@@ -15,7 +15,8 @@
   subtitle: "Course notes",
   academic-year: "2024-25",
   authors: (
-    "Dario Crosa", "Francesco Genovese"
+    "Dario Crosa",
+    "Francesco Genovese",
   ),
 )
 
@@ -28,4 +29,3 @@
 #include "chapters/02 - stochastic processes.typ"
 #include "chapters/03 - models.typ"
 #include "chapters/04 - frequency domain.typ"
-
