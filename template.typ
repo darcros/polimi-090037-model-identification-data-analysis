@@ -1,5 +1,5 @@
 
-#let is-upper(str) = str == {
+#let is-upper(str) = {
   let A = "A".to-unicode()
   let Z = "Z".to-unicode()
   let char = str.to-unicode()
