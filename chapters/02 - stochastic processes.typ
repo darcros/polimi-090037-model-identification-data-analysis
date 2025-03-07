@@ -226,62 +226,61 @@ Most notably:
   All the properties of generic transfer functions apply:
   - *Series* of filters: $y(t) = M(z)W(z)u(t)$
     #{
-  import fletcher: diagram, node, edge
-  figure(
-    diagram(
-      node-shape: "rect",
-      node-stroke: 1pt,
-      edge((0, 0), "rr", "-|>")[$u(t)$],
-      node((2,0))[W(z)],
-      edge("r", "-|>")[$s(t)$],
-      node((3,0))[M(z)],
-      edge("r", "-|>")[$y(t)$],
-    )
-  )
-}
+      import fletcher: diagram, node, edge
+      figure(
+        diagram(
+          node-shape: "rect",
+          node-stroke: 1pt,
+          edge((0, 0), "r", "-|>")[$u(t)$],
+          node((1,0))[W(z)],
+          edge("r", "-|>")[$s(t)$],
+          node((2,0))[M(z)],
+          edge("r", "-|>")[$y(t)$],
+        )
+      )
+    }
+
   - *Parallel* of filters: $y(t) = M(z)u(t) plus.minus W(z)u(t) $
   #{
-  import fletcher: diagram, node, edge
-  figure(
-    diagram(
-      node-shape: "rect",
-      node-stroke: 1pt,
-      edge((0, 0), (2,0), "-|>")[$u(t)$],  
-      edge((2,0), (2,0.7), "-|>"),
-      edge((2,0), (2,-0.7), "-|>"),
-      node((2,0.7))[W(z)],
-      node((2,-0.7))[M(z)],
-      edge((2,0.7), (4,0.7), "-|>")[$w(t)$],
-      edge((2,-0.7), (4,-0.7), "-|>")[$m(t)$],
-      edge((4,0.7), (4,0), "-|>"),
-      edge((4,-0.7), (4,0), "-|>"),
-      node((4,0))[$plus.minus$],
-      edge((4,0), (6,0), "-|>")[$y(t)$],
+    import fletcher: diagram, node, edge
+    figure(
+      diagram(
+        node-shape: "rect",
+        node-stroke: 1pt,
+        spacing: (3em, 1em),
+        edge((0, 0), "r,u,r", "-|>", label-pos: 15%)[$u(t)$],  
+        node((2,-1))[W(z)],
+        edge("r,d", "-|>", label-pos: 25%)[$w(t)$],
+        
+        edge((0, 0), "r,d,r", "-|>"),
+        node((2,1))[M(z)],
+        edge("r,u", "-|>", label-pos: 25%)[$m(t)$],
+        
+        node((3,0), shape: "circle", inset: 2pt, sym.plus.minus),
+        edge("r", "-|>")[$y(t)$],
+      )
     )
-  )
-}
+  }
 
-- Filters in *Feedback configurations*:  
-   $y(t) = M(z) / (1 minus.plus W(z)M(z)) u(t) $
+- Filters in *Feedback configurations*:
+  $y(t) = M(z) / (1 minus.plus W(z)M(z)) u(t) $
   #{
-  import fletcher: diagram, node, edge
-  figure(
-    diagram(
-      node-shape: "rect",
-      node-stroke: 1pt,
-      edge((-0, 0), (2,0), "-|>")[$epsilon(t)$],
-      edge((-1, 0), (0,0), "-|>")[$u(t)$],
-      node((2,0))[M(z)],
-      edge((2,0), (5,0), "-|>")[$y(t)$],
-      edge((4,0), (4,-0.7), "-|>"),
-      node((2,-0.7))[W(z)],
-      edge((4,-0.7), (2,-0.7), "-|>"),
-      edge((2,-0.7), (0,-0.7), "-|>"),
-      edge((0,-0.7), (0,0), "-|>"),
-      node((0,0))[$plus.minus$],
+    import fletcher: diagram, node, edge
+    figure(
+      diagram(
+        node-shape: "rect",
+        node-stroke: 1pt,
+        edge((0, 0), "r", "-|>")[$u(t)$],
+        node((1, 0), shape: "circle", inset: 2pt, sym.plus.minus),
+        edge("r", "-|>")[$epsilon(t)$],
+        node((2,0))[M(z)],
+        edge("rr", "-|>", label-pos: 75%)[$y(t)$],
+        edge("r,u,l", "-|>"),
+        node((2, -1))[W(z)],
+        edge("l,d", "-|>"),
+      )
     )
-  )
-}
+  }
 ]
 
   
