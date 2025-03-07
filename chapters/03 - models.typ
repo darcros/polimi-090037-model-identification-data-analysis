@@ -48,8 +48,8 @@
 
       let expected_value = range(-5,+5).map(x=> (x, 0.6))
       let values = range(-5, +5).map(x => (x, gamma-func(x)))
-      let tau_zero = range(0,0).map(x => (x, gamma-func(x)))
-      
+
+      // TODO: add a little more space between items in the legend
       plot.plot(
         size: (10,4),
         axis-style: "school-book",
@@ -58,18 +58,23 @@
         y-tick-step: none,
         y-label: none,
         {
-          plot.add(label: [$ m(t) = mu forall t $], expected_value)
-          plot.add(label: [$ gamma(tau) = 0 forall tau != 0 $], values, mark:"x",  style: (stroke: (dash: "dashed")))
-          plot.add(label: [$ gamma(tau) = lambda^2 "for" tau = 0 $], tau_zero, mark:"x")
- }
+          plot.add(label: [$ m_(e)(t) = mu quad forall t $], expected_value)
+          plot.add(
+            label: [$ 
+              gamma_(e)(tau) = cases(
+                lambda^2 quad &tau = 0,
+                0 quad forall &tau != 0
+              )
+            $],
+            mark:"x",
+            style: (stroke: (dash: "dashed")),
+            values,
+          )
+        }
       )
     }),
     caption: [Plot of $gamma(tau)$]
   )
-
-
-
-
 
 == Moving averages
 
