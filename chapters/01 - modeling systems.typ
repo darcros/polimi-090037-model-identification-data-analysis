@@ -41,7 +41,7 @@ Some challenges in model identification are:
       node-stroke: 1pt,
       edge((0, 0), "rr", "-|>")[$u(t)$],
       node((2,0))[system],
-      edge("r,d", "-|>")[$+$],
+      edge("r,d", "-|>", label-pos: 75%)[$+$],
       
       edge((0, 0), "r,d,r", "-|>"),
       node((2,1))[model],
