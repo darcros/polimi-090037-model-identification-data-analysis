@@ -3,7 +3,7 @@
   let A = "A".to-unicode()
   let Z = "Z".to-unicode()
   let char = str.to-unicode()
-  
+
   return A <= char and char <= Z
 }
 
@@ -33,7 +33,7 @@
   let gap = 1.25em
 
   let t = text(size: 2em, top-edge: "x-height", bottom-edge: "baseline", subtitle)
-  let (width, height, ) = measure(t)
+  let (width, height) = measure(t)
 
   box(line(start: (0pt, -height / 2), length: 100% - width - gap, stroke: luma(50%)))
   h(1fr)
@@ -45,7 +45,7 @@
   subtitle: none,
   authors: (),
   academic-year: none,
-  doc
+  doc,
 ) = {
   if (title == none) {
     panic("Title is required")
@@ -69,9 +69,9 @@
   {
     set text(size: 1.25em)
     set list(marker: none, body-indent: 0pt)
-  
+
     let h = text.with(weight: "bold")
-  
+
     grid(
       columns: 2,
       row-gutter: 1.2em,
