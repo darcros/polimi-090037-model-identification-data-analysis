@@ -16,7 +16,7 @@ So we analyze the covariance function $gamma$ instead.
 ]
 
 #remark[
-  $Gamma(omega) eq.triple cal(F){gamma_y(t)}$ is the Discrete Fourier Transform (DFT) of the covariance function $gamma_y(t)$. 
+  $Gamma(omega) eq.triple cal(F){gamma_y(t)}$ is the Discrete Fourier Transform (DFT) of the covariance function $gamma_y(t)$.
 ]
 
 #properties[
@@ -60,7 +60,7 @@ So we analyze the covariance function $gamma$ instead.
         edge((-1, 0), "r", "-|>")[$v(t)$],
         node((0, 0))[$W(z)$],
         edge((0, 0), "r", "-|>")[$y(t)$],
-      )
+      ),
     )
   }
 

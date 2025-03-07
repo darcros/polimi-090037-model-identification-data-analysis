@@ -19,62 +19,62 @@
 
 #properties(title: "spectral domain")[
   Let $e(t) ~ "WN"(mu, lambda^2)$
-  
+
   Then $Gamma_e(omega) = lambda^2, forall omega in RR$
 ]
 
 //TODO: add plot of the covariance function for visual aid
 #figure(
-    cetz.canvas({
-      import suiji: gen-rng
-      import cetz.draw: *
-      import cetz-plot: *
-      import "../util.typ": random-series
-      let rng = gen-rng(1)
-      let (rng, realization) = random-series(rng, 20, from: -1, to: 20)
+  cetz.canvas({
+    import suiji: gen-rng
+    import cetz.draw: *
+    import cetz-plot: *
+    import "../util.typ": random-series
+    let rng = gen-rng(1)
+    let (rng, realization) = random-series(rng, 20, from: -1, to: 20)
 
-      let gamma-func(tau, lambda2: 1.0) = {
-        tau = calc.abs(tau) // gamma is even function
-      
-        return if tau == 0 {
-           lambda2
-        } else {
-          0 
-        }
+    let gamma-func(tau, lambda2: 1.0) = {
+      tau = calc.abs(tau) // gamma is even function
+
+      return if tau == 0 {
+        lambda2
+      } else {
+        0
       }
+    }
 
-      // inclusive range
-      let range(from, to) = array.range(from, to + 1)
+    // inclusive range
+    let range(from, to) = array.range(from, to + 1)
 
-      let expected_value = range(-5,+5).map(x=> (x, 0.6))
-      let values = range(-5, +5).map(x => (x, gamma-func(x)))
+    let expected_value = range(-5, +5).map(x => (x, 0.6))
+    let values = range(-5, +5).map(x => (x, gamma-func(x)))
 
-      // TODO: add a little more space between items in the legend
-      plot.plot(
-        size: (10,4),
-        axis-style: "school-book",
-        x-tick-step: 1,
-        x-label: [$tau$],
-        y-tick-step: none,
-        y-label: none,
-        {
-          plot.add(label: [$ m_(e)(t) = mu quad forall t $], expected_value)
-          plot.add(
-            label: [$ 
+    // TODO: add a little more space between items in the legend
+    plot.plot(
+      size: (10, 4),
+      axis-style: "school-book",
+      x-tick-step: 1,
+      x-label: [$tau$],
+      y-tick-step: none,
+      y-label: none,
+      {
+        plot.add(label: [$ m_(e)(t) = mu quad forall t $], expected_value)
+        plot.add(
+          label: [$
               gamma_(e)(tau) = cases(
                 lambda^2 quad &tau = 0,
                 0 quad forall &tau != 0
               )
             $],
-            mark:"x",
-            style: (stroke: (dash: "dashed")),
-            values,
-          )
-        }
-      )
-    }),
-    caption: [Plot of $gamma(tau)$]
-  )
+          mark: "x",
+          style: (stroke: (dash: "dashed")),
+          values,
+        )
+      },
+    )
+  }),
+  caption: [Plot of $gamma(tau)$],
+)
 
 == Moving averages
 
@@ -83,13 +83,13 @@
 
   Then $y(t) = c_0 e(t) + c_1 e(t-1) + dots + c_n e(t-n) ~ "MA"(n)$
 
-  Moving averages are SSPs.  
+  Moving averages are SSPs.
 ]
 
 #properties[
   $m_y = mu dot sum_(i=0)^n c_i$
   $
-  gamma(tau) = lambda^2 dot cases(
+    gamma(tau) = lambda^2 dot cases(
     c_0 c_0 + c_1 c_1 + dots + c_n c_(n) &quad tau = 0 \
     c_0 c_1 + c_1 c_2 + dots + c_n c_(n-1) &quad tau = 1 \
     c_0 c_2 + c_1 c_3 + dots + c_n c_(n-2) &quad tau = 2 \
@@ -104,8 +104,8 @@
 
 #note-box[
   - $gamma (tau)$ has $n - tau + 1 $ non-zero terms.
-  - Moving averages are called *colored processes* 
-  - For $forall tau > n$ the model acts as white noise 
+  - Moving averages are called *colored processes*
+  - For $forall tau > n$ the model acts as white noise
 ]
 
 //TODO: add plot of the covariance function for visual aid
@@ -126,14 +126,14 @@ With the objective of modelling every kind of stochastic process, including thos
 
   Then, under the assumption that $sum_(i=0)^infinity c_i < infinity$
   $ y(t) = c_0 e(t) + c_1 e(t-1) + dots = sum_(i=0)^infinity c_i e(t) ~ "MA"(infinity) $
-  
+
   Moving averages are SSPs.
 ]
 
 #properties[
   A generalized version of @prop:moving-averages also holds for $"MA"(infinity)$
   - $m_y = mu dot sum_(i=0)^infinity c_i$
-  
+
   - $gamma(tau) = sum_(i=0)^infinity c_i c_(i + tau)$
 ]
 
@@ -151,22 +151,23 @@ With the objective of modelling every kind of stochastic process, including thos
   With autoregressive models we can have $gamma(tau) != 0$ for $tau -> infinity$ with a finite number of coefficients.
   - This is not possible with $"MA"(n)$ models.
   - This is possible with $"MA"(infinity)$ models, but working with an infinite number of coefficient is cumbersome.
-  
+
   // FIXME: only some or all?
   // TODO: maybe example?
   Some $"MA"(infinity)$ models can be expressed as $"AR"(m)$ models.
 ]
 
-#definition(title: "Steady state solution for an AR model" )[
-  Let $y(t) ~ "AR"(m)$ model, we can expand its definition 
-  
-  $ y(t) &= a y (t-1) + e(t) \
-         &= a^2 y(t-2) + a dot e(t-1)+  e(t) \
-         &= a^2 y(t-2) + a dot e(t-1)+  e(t) \
-         &= dots \
-         &= a^0e(t) + a^1 e(t-1) + a^2 e(t-2) + dots +a^m e(t-m) + dots + a^{t-t_0}y(t_0) 
+#definition(title: "Steady state solution for an AR model")[
+  Let $y(t) ~ "AR"(m)$ model, we can expand its definition
+
   $
-  The term $a^{t-t_0}y(t_0) $ is called *initial condition*, the rest is the *steady state solution*  
+    y(t) &= a y (t-1) + e(t) \
+    &= a^2 y(t-2) + a dot e(t-1)+ e(t) \
+    &= a^2 y(t-2) + a dot e(t-1)+ e(t) \
+    &= dots \
+    &= a^0e(t) + a^1 e(t-1) + a^2 e(t-2) + dots +a^m e(t-m) + dots + a^{t-t_0}y(t_0)
+  $
+  The term $a^{t-t_0}y(t_0) $ is called *initial condition*, the rest is the *steady state solution*
 ]
 
 #properties(title: "zeros and poles of AR model's transfer function")[
@@ -180,7 +181,7 @@ With the objective of modelling every kind of stochastic process, including thos
 ]
 
 #caution-box[
-  Considering the initial condition in the expression of the process, namely the combined $a^{t-t_0}y(t_0)$ can make the SP a non stationary one in the initial transient.  
+  Considering the initial condition in the expression of the process, namely the combined $a^{t-t_0}y(t_0)$ can make the SP a non stationary one in the initial transient.
 ]
 
 Hence, to find the mean and covariance of an $"AR"(n)$ model we must first check that it is a SSP. //In the case we're uncertain about the model type, we check the stability or ensure it's a $"MA"(n)$ process.
@@ -190,24 +191,25 @@ We can do that by calculating its transfer function, finding its poles and apply
 Then we can calculate the mean value $m$ and covariance function $gamma(tau)$ by taking advantage of its recursive nature.
 
 #example[
-  Let $e(t) ~ "WN"(0, lambda^2)$ and consider 
+  Let $e(t) ~ "WN"(0, lambda^2)$ and consider
   $ y(t) = a y(t-1) + e(t) ~ "AR"(1) $
 
   Calculating the mean value $m_y$
   $
-    m_y &= EE[y(t)] \ 
+    m_y &= EE[y(t)] \
     &= EE[a y(t-1) + e(t)] \
     &= a EE[y(t-1)] + EE[e(t)] \
     &= a EE[y(t)] + EE[e(t)] \
     &= a m_y + 0 \
   $
-  $ =>
+  $
+    =>
     m_y &= a m_y \
     m_y &= 0
   $
 
   Calculating variance $gamma(0)$
-  $ 
+  $
     gamma(0) &= EE[(y(t) - m_y)(y(t-0) - m_y)] \
     &= EE[(y(t))^2] \
     &= EE[(a y(t-1) + e(t))^2] \
@@ -240,10 +242,12 @@ Then we can calculate the mean value $m$ and covariance function $gamma(tau)$ by
   $
 
   We get a set of recursive equations:
-  $ cases(
+  $
+    cases(
     gamma(0) = 1 / (1-a^2) lambda^2,
     gamma(tau) = a gamma(tau - 1) quad |tau| >= 1,
-  ) $
+  )
+  $
 
   #figure(
     cetz.canvas({
@@ -256,7 +260,7 @@ Then we can calculate the mean value $m$ and covariance function $gamma(tau)$ by
 
       let gamma-func(tau, a: 0.5, lambda2: 1.0) = {
         tau = calc.abs(tau) // gamma is even function
-        
+
         return if tau == 0 {
           1 / (1 - calc.pow(a, 2)) * lambda2
         } else {
@@ -266,24 +270,36 @@ Then we can calculate the mean value $m$ and covariance function $gamma(tau)$ by
 
       // inclusive range
       let range(from, to) = array.range(from, to + 1)
-      
+
       let values-pos-a = range(-5, +5).map(x => (x, gamma-func(x, a: +0.5)))
       let values-neg-a = range(-5, +5).map(x => (x, gamma-func(x, a: -0.5)))
-      
+
       plot.plot(
-        size: (10,4),
+        size: (10, 4),
         axis-style: "school-book",
         x-tick-step: 1,
         x-label: [$tau$],
         y-tick-step: none,
         y-label: none,
         {
-          plot.add(label: [$gamma(tau), |a|<1, a>0$], values-pos-a, mark:"x", line: "spline", style: (stroke: (dash: "dashed")))
-          plot.add(label: [$gamma(tau), |a|<1, a<0$], values-neg-a, mark:"x", line: "spline", style: (stroke: (dash: "dashed")))
-        }
+          plot.add(
+            label: [$gamma(tau), |a|<1, a>0$],
+            values-pos-a,
+            mark: "x",
+            line: "spline",
+            style: (stroke: (dash: "dashed")),
+          )
+          plot.add(
+            label: [$gamma(tau), |a|<1, a<0$],
+            values-neg-a,
+            mark: "x",
+            line: "spline",
+            style: (stroke: (dash: "dashed")),
+          )
+        },
       )
     }),
-    caption: [Plot of $gamma(tau)$]
+    caption: [Plot of $gamma(tau)$],
   )
 ]
 
@@ -291,7 +307,7 @@ Then we can calculate the mean value $m$ and covariance function $gamma(tau)$ by
 
 #theorem[
   Let $e(t) ~ "WN"(0, lambda^2)$ and $y(t) = e(t) + a e(t-1) ~ "AR"(1) $
-  
+
   Then $EE[y(t-tau) e(t)] = 0, forall tau >= 0$
 ] <thm:null-expected-value>
 
@@ -317,10 +333,10 @@ The modeling power of $"MA"(infinity)$ is unmatched by $"AR"(1)$ models but we c
 #definition(title: "ARMA model")[
   Let $e(t) ~ "WN"(mu, lambda^2)$
 
-  Then $y(t) ~ "ARMA"(m, n)$ iff  
+  Then $y(t) ~ "ARMA"(m, n)$ iff
   $
-    y(t) =  &underbrace(a_1 y(t-1) + a_2 y(t-2) + dots + a_m y(t-m), "AR"(m)) + \ 
-            &underbrace(c_0 e(t)   + c_1 e(t-1) + dots + c_n e(t-n), "MA"(n)) \
+    y(t) = &underbrace(a_1 y(t-1) + a_2 y(t-2) + dots + a_m y(t-m), "AR"(m)) + \
+    &underbrace(c_0 e(t)   + c_1 e(t-1) + dots + c_n e(t-n), "MA"(n)) \
   $
 ]
 
@@ -331,11 +347,11 @@ If we also consider the input of the system (the eXogenous part) we get an $"ARM
 #definition(title: "ARMAX model")[
   Let $e(t) ~ "WN"(mu, lambda^2)$
 
-  Then $y(t) ~ "ARMAX"(m, n, k, p)$ iff  
+  Then $y(t) ~ "ARMAX"(m, n, k, p)$ iff
   $
-    y(t) =  &underbrace(a_1 y(t-1) + a_2 y(t-2) + dots + a_m y(t-m), "AR"(m)) + \ 
-            &underbrace(c_0 e(t)   + c_1 e(t-1) + dots + c_n e(t-n), "MA"(n)) + \
-            &underbrace(b_0 u(t-k) + b_1 u(t-k-1) + dots + b_n u(t-k-p), "X"(k, p))
+    y(t) = &underbrace(a_1 y(t-1) + a_2 y(t-2) + dots + a_m y(t-m), "AR"(m)) + \
+    &underbrace(c_0 e(t)   + c_1 e(t-1) + dots + c_n e(t-n), "MA"(n)) + \
+    &underbrace(b_0 u(t-k) + b_1 u(t-k-1) + dots + b_n u(t-k-p), "X"(k, p))
   $
 
   Where
@@ -346,11 +362,11 @@ If we also consider the input of the system (the eXogenous part) we get an $"ARM
 #remark[
   The input/output delay $k$ of an $"ARMA"(m,n,k,p)$ process is visible in the step response graph of the eXogenous part.
   #figure(
-      cetz.canvas({
+    cetz.canvas({
       import cetz.draw: *
       import cetz-plot: *
       plot.plot(
-        size: (6,4),
+        size: (6, 4),
         axis-style: "school-book",
         x-min: -1,
         x-max: +5,
@@ -365,21 +381,21 @@ If we also consider the input of the system (the eXogenous part) we get an $"ARM
           plot.add(
             label: "step response",
             domain: (-1, 5),
-            sample-at: (2, ), // add a sample to keep the line sharp
-            (x) => if x < 2 {
+            sample-at: (2,), // add a sample to keep the line sharp
+            x => if x < 2 {
               0
             } else {
-               1 - calc.exp(-1.75 * (x - 2))
-            }
+              1 - calc.exp(-1.75 * (x - 2))
+            },
           )
 
           plot.annotate({
             cetz.decorations.flat-brace(name: "k-brace", (1, 0), (2, 0), flip: true)
             content("k-brace.content")[$k$]
           })
-        }
+        },
       )
-    })
+    }),
   )
 ]
 
@@ -390,11 +406,11 @@ If we apply a non-linear function to an $"ARMAX"$ model we get a $"N-ARMAX"$ mod
 
   Let $f$ be any non-linear function (polynomials, splines, wavelengths, neural networks etc.)
 
-  Then $y(t) ~ "N-ARMAX"(m, n, k, p)$ iff  
+  Then $y(t) ~ "N-ARMAX"(m, n, k, p)$ iff
   $
     y(t) = f( quad
-      &a_1 y(t-1), a_2 y(t-2),   dots, a_m y(t-m), \ 
-      &c_0 e(t),   c_1 e(t-1),   dots, c_n e(t-n), \
+      &a_1 y(t-1), a_2 y(t-2), dots, a_m y(t-m), \
+      &c_0 e(t), c_1 e(t-1), dots, c_n e(t-n), \
       &b_0 u(t-k), b_1 u(t-k-1), dots, b_n u(t-k-p))
     quad )
   $
