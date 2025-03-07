@@ -239,7 +239,7 @@ Most notably:
     )
   )
 }
-  - **Parallel** of filters: $y(t) = M(z)u(t) plus.minus W(z)u(t) $
+  - *Parallel* of filters: $y(t) = M(z)u(t) plus.minus W(z)u(t) $
   #{
   import fletcher: diagram, node, edge
   figure(
@@ -261,7 +261,7 @@ Most notably:
   )
 }
 
-- Filters in **Feedback configurations**:  
+- Filters in *Feedback configurations*:  
    $y(t) = M(z) / (1 minus.plus W(z)M(z)) u(t) $
   #{
   import fletcher: diagram, node, edge
