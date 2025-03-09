@@ -29,3 +29,6 @@
 #include "chapters/02 - stochastic processes.typ"
 #include "chapters/03 - models.typ"
 #include "chapters/04 - frequency domain.typ"
+#include "chapters/05 - representations.typ"
+#include "chapters/06 - prediction.typ"
+#include "chapters/07 - model identification.typ"

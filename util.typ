@@ -32,7 +32,7 @@
 
 #let random-series(rng, length, from: 0, to: 1, min: -1.0, max: +1.0) = rng-iter(
   rng,
-  length,
+  length + 1,
   (r, i) => {
     let time = from + i * ((to - from) / length)
     let (r, value) = uniform(r, low: min, high: max)

@@ -12,10 +12,14 @@
 #import "@preview/theorion:0.3.2": *
 #import cosmos.rainbow: *
 
-
 #let (properties-counter, properties-box, properties, show-properties) = make-frame(
   "properties",
   (en: "Properties", it: "Proprietà"),
   inherited-levels: 2, // just to make it the same as the other boxes
-  render: render-fn.with(fill: green.darken(40%)) // render-fn from cosoms.rainbow
+  render: render-fn.with(fill: green.darken(40%)), // render-fn from cosoms.rainbow
 )
+
+// custom math shortcuts
+
+#let argmin = $op("argmin", limits: #true)$
+#let transposed = $sans(upright(T))$

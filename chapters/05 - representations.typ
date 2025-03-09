@@ -68,4 +68,5 @@ For each of these possible cases, we can define properties so to define a SSP in
   + $C(z), A(z)$ are *coprime*: the greatest common divisor is 1
   + $C(z), A)(z)$ have *roots in the unit circle*: $abs(z_i) = 1, i = 1, ..., n$
 
-]
+] <thm:canonical-representation>
+
