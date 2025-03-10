@@ -2,11 +2,11 @@
 #import "@preview/suiji:0.3.0"
 
 // drawings and plots
-#import "@preview/cetz:0.3.2"
+#import "@preview/cetz:0.3.3"
 #import "@preview/cetz-plot:0.1.1"
 
 // diagrams
-#import "@preview/fletcher:0.5.5"
+#import "@preview/fletcher:0.5.6"
 
 // theorem boxes
 #import "@preview/theorion:0.3.2": *
