@@ -214,12 +214,12 @@ This is needed in order to use @thm:stationarity
   / Linear composition: $ (a z^(-1) + b z + c z^(-3) + d z^(+2)) = a x(t-1) + b x(t+1) + c x(t-3) + d x(t+2) $
 ]
 
-We can use the $z$ operator to calculate the *transfer function* of various models, we will see it with $"AR"(m)$, $"MA"(n)$, $"ARMA"(m, n)$ and $"ARMAX"$ models.
+We can use the $z$ operator to calculate the *transfer function* of various models, we will see it with $AR(m)$, $MA(n)$, $ARMA(m, n)$ and $ARMAX$ models.
 
 Most notably:
-- all $"AR"(m)$, $"MA"(n)$ and $"ARMA"(m, n)$ models can be written as
+- all $AR(m)$, $MA(n)$ and $ARMA(m, n)$ models can be written as
   $ W(z) e(t) = C(z) / A(z) e(t) quad z in CC $
-- all $"ARMAX"$ models can be written as
+- all $ARMAX$ models can be written as
   $ W(z) e(t) = B(z) / A(z) z^(-k) u(t) + C(z) / A(z) e(t) quad z in CC $
 
 #note-box[

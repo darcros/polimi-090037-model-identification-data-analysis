@@ -5,7 +5,7 @@
 #problem(title: "Prediction problem")[
   Given
   - a SSP $y(t)$ in canonical form
-    $ y(t) = C(z) / A(z) e(t), quad e(t) ~ "WN"(mu, lambda^2) $
+    $ y(t) = C(z) / A(z) e(t), quad e(t) ~ WN(mu, lambda^2) $
     with $C(z)$, $A(z)$, $mu$, $lambda^2$ known.
 
   - a specific realization $y(0), y(1), dots y(t)$

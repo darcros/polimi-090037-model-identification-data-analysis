@@ -69,7 +69,7 @@ When designing the experiment we need to:
 ]
 
 #example[
-  Consider the class of $"ARMAX"(m, n, k, p)$ models
+  Consider the class of $ARMAX(m, n, k, p)$ models
   $
     mat(delim: #none, align: #left, row-gap: #1em, column-gap: #0.5em,
       y(t) = #h(1em)
@@ -78,7 +78,7 @@ When designing the experiment we need to:
       , +c_0 e(t), +c_1 e(t-1), + c_2 e(t-2), dots, + c_m e(t-n);
     )
   $
-  where $e(t) ~ "WN"(0, lambda^2)$.
+  where $e(t) ~ WN(0, lambda^2)$.
 
   Then
   $ theta = mat(a_1, a_2, dots, b_0, b_1, b_2, dots, c_0, c_1, c_2, dots)^transposed in Theta subset.eq RR^(m + n + p) $
@@ -88,7 +88,7 @@ When designing the experiment we need to:
     We also need to know
     - $lambda^2$: the variance of the white noise
     - $k$: the pure delay of the system
-    - m, n, p: the degrees of the $"AR"$, $"MA"$ and $"X"$ parts
+    - m, n, p: the degrees of the $AR$, $MA$ and $"X"$ parts
 
     The first two are not critical in the sense that they can be obtained "for free" through the minimaztion of our identification criterion (see @model-ident:step-3).
     While the latter must be specified ahead a priori.
@@ -97,12 +97,12 @@ When designing the experiment we need to:
   #note-box[
     $Theta != RR^(m + n + p)$ because some values in $RR^(m + n + p)$ are not admissible.
 
-    Consider $y(t) = a_1 y(t-1) + e(t) ~ "AR"(1) = "ARMAX"(1, 0, 0, 0)$
+    Consider $y(t) = a_1 y(t-1) + e(t) ~ AR(1) = ARMAX(1, 0, 0, 0)$
 
     In order for $y(t)$ to be static, we need $|a_1| < 1$ (see @thm:stationarity).
 
     So $Theta = {a : |a| < 1} subset RR^1$ and our model class would be
-    $cal(M)_theta = {"AR"(1), theta = a, |a| < 1}$
+    $cal(M)_theta = {AR(1), theta = a, |a| < 1}$
     // FIXME: the notation for the model class is a bit weird, but it is what the prof. wrote so...
   ]
 ]
@@ -140,8 +140,8 @@ $ cal(J)(theta) = 1 / N sum_(t=1)^N (y(t+1) - hat(y)(t|t-1, theta))^2 $
 === Minimization of the identification criterion
 
 We will consider two situations:
-- $cal(J)(theta)$ is quadratic, this is the case for $"AR"$ and $"ARX"$ models
-- $cal(J)(theta)$ is non-quadratic, this is the case for $"ARMA"$ and $"ARMAX"$ models
+- $cal(J)(theta)$ is quadratic, this is the case for $AR$ and $"ARX"$ models
+- $cal(J)(theta)$ is non-quadratic, this is the case for $ARMA$ and $ARMAX$ models
 
 === Model validation
 

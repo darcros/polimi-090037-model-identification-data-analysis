@@ -5,7 +5,7 @@
 == White noise
 
 #definition(title: "White noise")[
-  $e(t) ~ "WN"(mu, lambda^2)$ iff
+  $e(t) ~ WN(mu, lambda^2)$ iff
   - $m_e = mu$
   - $gamma(0) = lambda^2$
   - $gamma(tau) = 0 quad forall tau != 0$
@@ -18,7 +18,7 @@
 ]
 
 #properties(title: "spectral domain")[
-  Let $e(t) ~ "WN"(mu, lambda^2)$
+  Let $e(t) ~ WN(mu, lambda^2)$
 
   Then $Gamma_e(omega) = lambda^2, forall omega in RR$
 ]
@@ -79,9 +79,9 @@
 == Moving averages
 
 #definition(title: [Moving Average of order $n$])[
-  Let $e(t) ~ "WN"(mu, lambda^2)$
+  Let $e(t) ~ WN(mu, lambda^2)$
 
-  Then $y(t) = c_0 e(t) + c_1 e(t-1) + dots + c_n e(t-n) ~ "MA"(n)$
+  Then $y(t) = c_0 e(t) + c_1 e(t-1) + dots + c_n e(t-n) ~ MA(n)$
 
   Moving averages are SSPs.
 ]
@@ -111,27 +111,27 @@
 //TODO: add plot of the covariance function for visual aid
 
 #properties(title: "zeros and poles of MA model's transfer function")[
-  All $"MA"(n)$ processes have
+  All $MA(n)$ processes have
   - $n$ zeros, all lying at the origin
   - $n$ non-trivial poles
 
-  For this reason $"MA"(m)$ processes are called "all-poles" processes.
+  For this reason $MA(m)$ processes are called "all-poles" processes.
 ]
 
 === Moving averages of order $infinity$
 With the objective of modelling every kind of stochastic process, including those that have memory of the previous inputs and previous outputs, we define processes which have memory of any input up to that point because any previous output will also be a linear combination of previous inputs.
 
 #definition(title: [Moving Average of order $infinity$])[
-  Let $e(t) ~ "WN"(mu, lambda^2)$
+  Let $e(t) ~ WN(mu, lambda^2)$
 
   Then, under the assumption that $sum_(i=0)^infinity c_i < infinity$
-  $ y(t) = c_0 e(t) + c_1 e(t-1) + dots = sum_(i=0)^infinity c_i e(t) ~ "MA"(infinity) $
+  $ y(t) = c_0 e(t) + c_1 e(t-1) + dots = sum_(i=0)^infinity c_i e(t) ~ MA(infinity) $
 
   Moving averages are SSPs.
 ]
 
 #properties[
-  A generalized version of @prop:moving-averages also holds for $"MA"(infinity)$
+  A generalized version of @prop:moving-averages also holds for $MA(infinity)$
   - $m_y = mu dot sum_(i=0)^infinity c_i$
 
   - $gamma(tau) = sum_(i=0)^infinity c_i c_(i + tau)$
@@ -140,25 +140,25 @@ With the objective of modelling every kind of stochastic process, including thos
 == Autoregressive models
 
 #definition(title: "Autoregressive model")[
-  Let $e(t) ~ "WN"(mu, lambda^2)$
+  Let $e(t) ~ WN(mu, lambda^2)$
 
-  Then $y(t) = e(t) + a_1 y(t-1) + a_2 y(t-2) + dots + a_n y(t-m) ~ "AR"(m) $
+  Then $y(t) = e(t) + a_1 y(t-1) + a_2 y(t-2) + dots + a_n y(t-m) ~ AR(m) $
 ]
 
 // TODO: that thing about "AR <==> steady state solution of the difference equation"
 
 #remark[
   With autoregressive models we can have $gamma(tau) != 0$ for $tau -> infinity$ with a finite number of coefficients.
-  - This is not possible with $"MA"(n)$ models.
-  - This is possible with $"MA"(infinity)$ models, but working with an infinite number of coefficient is cumbersome.
+  - This is not possible with $MA(n)$ models.
+  - This is possible with $MA(infinity)$ models, but working with an infinite number of coefficient is cumbersome.
 
   // FIXME: only some or all?
   // TODO: maybe example?
-  Some $"MA"(infinity)$ models can be expressed as $"AR"(m)$ models.
+  Some $MA(infinity)$ models can be expressed as $AR(m)$ models.
 ]
 
 #definition(title: "Steady state solution for an AR model")[
-  Let $y(t) ~ "AR"(m)$ model, we can expand its definition
+  Let $y(t) ~ AR(m)$ model, we can expand its definition
 
   $
     y(t) &= a y (t-1) + e(t) \
@@ -171,11 +171,11 @@ With the objective of modelling every kind of stochastic process, including thos
 ]
 
 #properties(title: "zeros and poles of AR model's transfer function")[
-  All $"AR"(m)$ processes have
+  All $AR(m)$ processes have
   - $m$ non-trivial zeros
   - $m$ poles, all lying at the origin
 
-  For this reason $"AR"(m)$ processes are called "all-zeros" processes.
+  For this reason $AR(m)$ processes are called "all-zeros" processes.
 
   // TODO: is there a way to quickly find the zeros from the coefficients of y(t) ~ AR(m) ?
 ]
@@ -184,15 +184,15 @@ With the objective of modelling every kind of stochastic process, including thos
   Considering the initial condition in the expression of the process, namely the combined $a^{t-t_0}y(t_0)$ can make the SP a non stationary one in the initial transient.
 ]
 
-Hence, to find the mean and covariance of an $"AR"(n)$ model we must first check that it is a SSP. //In the case we're uncertain about the model type, we check the stability or ensure it's a $"MA"(n)$ process.
+Hence, to find the mean and covariance of an $AR(n)$ model we must first check that it is a SSP. //In the case we're uncertain about the model type, we check the stability or ensure it's a $MA(n)$ process.
 
 We can do that by calculating its transfer function, finding its poles and applying @thm:stationarity.
 
 Then we can calculate the mean value $m$ and covariance function $gamma(tau)$ by taking advantage of its recursive nature.
 
 #example[
-  Let $e(t) ~ "WN"(0, lambda^2)$ and consider
-  $ y(t) = a y(t-1) + e(t) ~ "AR"(1) $
+  Let $e(t) ~ WN(0, lambda^2)$ and consider
+  $ y(t) = a y(t-1) + e(t) ~ AR(1) $
 
   Calculating the mean value $m_y$
   $
@@ -306,13 +306,13 @@ Then we can calculate the mean value $m$ and covariance function $gamma(tau)$ by
 //TODO add graphical representation of possible realizations given the form of the covariance functions (smooth and nervous processes)
 
 #theorem[
-  Let $e(t) ~ "WN"(0, lambda^2)$ and $y(t) = e(t) + a e(t-1) ~ "AR"(1) $
+  Let $e(t) ~ WN(0, lambda^2)$ and $y(t) = e(t) + a e(t-1) ~ AR(1) $
 
   Then $EE[y(t-tau) e(t)] = 0, forall tau >= 0$
 ] <thm:null-expected-value>
 
 #remark[
-  @thm:null-expected-value is also valid for $"AR"(n)$ (trust me bro).
+  @thm:null-expected-value is also valid for $AR(n)$ (trust me bro).
 ]
 
 #proof[
@@ -328,29 +328,29 @@ Then we can calculate the mean value $m$ and covariance function $gamma(tau)$ by
 ]
 
 == ARMA models
-The modeling power of $"MA"(infinity)$ is unmatched by $"AR"(1)$ models but we can combine an $"AR"(m)$ and a $"MA"(n)$ models to get an $"ARMA"(m, n)$ model to model our time series with the least amount of coefficients possible
+The modeling power of $MA(infinity)$ is unmatched by $AR(1)$ models but we can combine an $AR(m)$ and a $MA(n)$ models to get an $ARMA(m, n)$ model to model our time series with the least amount of coefficients possible
 
 #definition(title: "ARMA model")[
-  Let $e(t) ~ "WN"(mu, lambda^2)$
+  Let $e(t) ~ WN(mu, lambda^2)$
 
-  Then $y(t) ~ "ARMA"(m, n)$ iff
+  Then $y(t) ~ ARMA(m, n)$ iff
   $
-    y(t) = &underbrace(a_1 y(t-1) + a_2 y(t-2) + dots + a_m y(t-m), "AR"(m)) + \
-    &underbrace(c_0 e(t)   + c_1 e(t-1) + dots + c_n e(t-n), "MA"(n)) \
+    y(t) = &underbrace(a_1 y(t-1) + a_2 y(t-2) + dots + a_m y(t-m), AR(m)) + \
+    &underbrace(c_0 e(t)   + c_1 e(t-1) + dots + c_n e(t-n), MA(n)) \
   $
 ]
 
 === Other variants of ARMA
 
-If we also consider the input of the system (the eXogenous part) we get an $"ARMAX"$ model.
+If we also consider the input of the system (the eXogenous part) we get an $ARMAX$ model.
 
 #definition(title: "ARMAX model")[
-  Let $e(t) ~ "WN"(mu, lambda^2)$
+  Let $e(t) ~ WN(mu, lambda^2)$
 
-  Then $y(t) ~ "ARMAX"(m, n, k, p)$ iff
+  Then $y(t) ~ ARMAX(m, n, k, p)$ iff
   $
-    y(t) = &underbrace(a_1 y(t-1) + a_2 y(t-2) + dots + a_m y(t-m), "AR"(m)) + \
-    &underbrace(c_0 e(t)   + c_1 e(t-1) + dots + c_n e(t-n), "MA"(n)) + \
+    y(t) = &underbrace(a_1 y(t-1) + a_2 y(t-2) + dots + a_m y(t-m), AR(m)) + \
+    &underbrace(c_0 e(t)   + c_1 e(t-1) + dots + c_n e(t-n), MA(n)) + \
     &underbrace(b_0 u(t-k) + b_1 u(t-k-1) + dots + b_n u(t-k-p), "X"(k, p))
   $
 
@@ -360,7 +360,7 @@ If we also consider the input of the system (the eXogenous part) we get an $"ARM
 ]
 
 #remark[
-  The input/output delay $k$ of an $"ARMA"(m,n,k,p)$ process is visible in the step response graph of the eXogenous part.
+  The input/output delay $k$ of an $ARMAX(m,n,k,p)$ process is visible in the step response graph of the eXogenous part.
   #figure(
     cetz.canvas({
       import cetz.draw: *
@@ -399,10 +399,10 @@ If we also consider the input of the system (the eXogenous part) we get an $"ARM
   )
 ]
 
-If we apply a non-linear function to an $"ARMAX"$ model we get a $"N-ARMAX"$ model.
+If we apply a non-linear function to an $ARMAX$ model we get a $"N-ARMAX"$ model.
 
 #definition(title: "N-ARMAX model")[
-  Let $e(t) ~ "WN"(mu, lambda^2)$
+  Let $e(t) ~ WN(mu, lambda^2)$
 
   Let $f$ be any non-linear function (polynomials, splines, wavelengths, neural networks etc.)
 

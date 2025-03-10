@@ -23,3 +23,9 @@
 
 #let argmin = $op("argmin", limits: #true)$
 #let transposed = $sans(upright(T))$
+
+#let WN = $op("WN")$ 
+#let AR = $op("AR")$ 
+#let MA = $op("MA")$ 
+#let ARMA = $op("ARMA")$
+#let ARMAX = $op("ARMAX")$ 
