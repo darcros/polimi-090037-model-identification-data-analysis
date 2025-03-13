@@ -56,9 +56,13 @@
 ]
 
 #definition(title: "Predictor")[
-  $hat(y) (t+k|t)$ is the is the predictor of SSP $y(t)$.
+  $hat(y) (t+k|t)$ is the predictor of SSP $y(t)$.
 
   // TODO: explain
+]
+
+#definition(title: "Trivial predictor")[
+  $hat(y) (t+k|t) = EE[y(t)] = m_y$
 ]
 
 #definition(title: "Linear predictor")[
@@ -84,6 +88,8 @@
     &= EE[(t(t+k) - hat(y) (t+k|t))^2]
   $
 ]
+
+== Optimal predictor
 
 #problem(title: "Optimal predictor problem")[
   Given a SSP $y(t)$, we would like to find the predictor $hat(y) (t+k|t)$ that minimizes $cal(J)(hat(y))$.
