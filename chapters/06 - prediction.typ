@@ -6,6 +6,10 @@
   Given
   - a SSP $y(t)$ in canonical form
     $ y(t) = C(z) / A(z) e(t), quad e(t) ~ WN(mu, lambda^2) $
+
+    // FIXME: when doing prediction we know the model, right?
+    // When doing model identification we don't know the model.
+    // - Dario
     with $C(z)$, $A(z)$, $mu$, $lambda^2$ known.
 
   - a specific realization $y(0), y(1), dots y(t)$
@@ -70,8 +74,8 @@
 
 #definition(title: "Prediction error")[
   The prediction error of $hat(y)$ is
-  $ epsilon(t+k|t) = t(t+k) - hat(y) (t+k|t) $
-]
+  $ epsilon(t+k|t) = y(t+k) - hat(y) (t+k|t) $
+] <def:prediction-error>
 
 #definition(title: "Mean squared prediction error")[
   The MSP of $hat(y)$ is
@@ -156,4 +160,257 @@
   This solution presents some practical challenges, because:
   - it requires samples of $e(t)$ (we can only sample $y(t)$)
   - it requires the use of an infinite number of coefficients
+]
+
+#problem[
+  We want to find a predictor $hat(y)$ as before, but with a finite number of coefficients.
+]
+
+#solution[
+  Consider the operatorial representation of $y(t)$:
+  $ y(t) = W(z)e(t) = C(z) / A(z) e(t) $
+
+  We can rewrite the transfer function as
+  $
+    W(z)
+    = C(z) / A(z)
+    = (1 + c_1 z^(-1) + c_2 z^(-2) + dots + c_n z^(-n)) / (1 + a_1 z^(-1) + a_2 z^(-2) + dots + a_m z^(-m))
+    = w_0 + w_1 z^(-1) + w_2 z^(-2) + dots
+  $
+
+  but this sequence is infinite.
+
+  Lets instead consider a finite number $k$ of division steps
+  $
+    longdivision(
+      divisor: A(z),
+      quotient: E(z),
+      steps: C(z) \ dots.v \ z^(-k) F(z)
+    )
+  $
+
+  After $k$ division steps we get a quotient $E(z)$ which is a polynomial of order $k$ and a rest $z^(-k) F(z)$
+  $ W(z) = C(z) / A(z) = E(z) + (z^(-k) F(z)) / A(z) $
+
+  // TODO: move this somewhere more appropriate
+  #definition(title: "Diophantine equation")[
+    $ C(z) = E(z)A(z) + z^(-k) F(z) $
+  ]
+
+  If we substitute $W(z) = E(z) + (z^(-k) F(z)) / A(z)$ into $y(t+k)$ we can observe that
+  $
+    y(t+k) &= W(z) e(t+k) \
+    &= (E(z) + (z^(-k) F(z)) / A(z)) e(t+k) \
+    &= E(z) e(t+k) + F(z) / A(z) z^(-k) e(t+k) \
+    &=
+    underbrace(E(z) e(t+k), "(a)") +
+    underbrace(F(z) / A(z) e(t), "(b)")
+  $
+
+  // TODO: actual links
+  #[
+    #set enum(numbering: "(a)")
+    + depends on future samples of $e(t)$ and is unpredictable at time $t$
+    + depends on past samples of $e(t)$ and is computable at time $t$ and will be our predictor
+  ]
+
+  $ y(t+k) = #[prediction error] + #[prediction at time $t$] $
+
+  #definition(title: "Predictor from noise")[
+    Given a SSP $y(t) = W(z)e(t)$
+    where
+    - $W(z)$ in normal form
+    - $e(t) ~ WN(0, lambda^2)$
+    the _predictor from noise_ is
+
+    $ hat(y)(t+k|t) = F(z) / A(z) e(t) $
+
+    where $F(z)$, $A(z)$ are from $W(z) = E(z) + (z^(-k) F(z)) / A(z)$.
+
+    $hat(y)$ is an $ARMA$ process.
+  ]
+]
+
+#remark[
+  This predictor is better than the first one as it has a finite number of coefficients, however it is still dependent on samples of the noise $e(t)$ which we don't have.
+]
+
+#problem[
+  We want to find a predictor $hat(y)$ as before, but
+  - with a finite number of coefficients
+  - _dependent on samples of $y(t)$, not $e(t)$_
+]
+
+#definition(title: "Whitening filter")[
+  For a SSP $y(t)$ with transfer function $W(z)$
+  $ W(z) = C(z) / A(z) $
+  the _whitening filter_ is
+  // TODO: i called it X because we did not give it a name
+  $ X(z) = A(z) / C(z) $
+
+  The whitening filter "de-colors" $y(t)$ and turns it into white noise
+  #{
+    import fletcher: diagram, node, edge
+    figure(
+      diagram(
+        node-shape: "rect",
+        node-stroke: 1pt,
+        edge((0, 0), "r", "-|>")[$e(t)$],
+        node((1, 0))[$W(z)$],
+        edge((1, 0), "rrr", "-|>")[$y(t) = C(z) / A(z) e(t)$],
+        node((4, 0))[$X(z)$],
+        edge("rrr", "-|>")[$C(z) / A(z) A(z) / C(z) e(t) = e(t)$],
+      ),
+    )
+  }
+]
+
+#remark[
+  $
+    y(t) = C(z) / A(z) e(t) <==> e(t) = A(z) / C(z) y(t)
+  $
+]
+
+#solution[
+  We apply the whitening filter to the predictor $hat(y)$
+
+  $
+    hat(y)(t+k|t)
+    = F(z) / A(z) e(t)
+    = F(z) / cancel(A(z)) cancel(A(z)) / C(z) y(t)
+    = F(z) / C(z) y(t)
+  $
+
+  #definition(title: "Predictor from data")[
+    Given a SSP $y(t) = W(z)e(t)$
+    where
+    - $W(z)$ in normal form
+    - $e(t) ~ WN(0, lambda^2)$
+    the _predictor from data_ is
+
+    $ hat(y)(t+k|t) = F(z) / C(z) y(t) $
+
+    where $F(z)$, $C(z)$ are from $W(z) = E(z) + (z^(-k) F(z)) / A(z)$.
+
+    $hat(y)$ is a SSP. // TODO: is it ARMA process?
+  ]
+]
+
+#remark[
+  The quality of the prediction gets worse with increasing $k$.
+  // TODO: why?
+]
+
+== Analysis of the prediction error
+
+Let's consider the prediction error of the optimal predictor
+$
+  epsilon(t+k|t) &= y(t+k) - hat(y) (t+k|t) \
+  &= W(z)e(t+k) - hat(y) (t+k|t) \
+  &= (E(z) + F(z) / A(z) z^(-k)) e(t+k) - F(z) / A(z) e(t) \
+  &= E(z)e(t+k) + F(z) / A(z) z^(-k) e(t+k) - F(z) / A(z) e(t) \
+  &= E(z)e(t+k) + cancel(F(z) / A(z) e(t)) - cancel(F(z) / A(z) e(t)) \
+  &= E(z)e(t+k) \
+  &= cal(e)_o e(t) + cal(e)_1 e(t-1) + dots + cal(e)_(k-1) e(t-k+1)
+$
+
+So the variance of $epsilon(t|t+k)$ is
+$
+  EE[epsilon(t+k|k)^2] = (cal(e)_0^2 + cal(e)_1^2 + dots + cal(e)_(k-1)^2) lambda^2
+$
+
+#remark[
+  If $k -> +infinity$ then $E(z)$ becomes the $MA(infinity)$ representation of $y(t)$.
+  This means that $ EE[epsilon(t+k|t)^2] = EE[E(z)e(t+k)] -->_(k -> +infinity) EE[y(t)] $
+]
+
+#figure(
+  cetz.canvas({
+    import suiji: gen-rng
+    import cetz.draw: *
+    import cetz-plot: *
+    import "../util.typ": random-series
+
+    // variance function implementation
+    let lambda2 = 1.0
+    // TODO: check if this sequence of e_i coefficients is realistic
+    let e(i) = if i == 0 { 0.35 } else { 1 / calc.pow(2, i * 0.45) }
+    let var(k) = {
+      let coefficients = array.range(0, k).map(e)
+      return coefficients.map(e => calc.pow(e, 2)).sum(default: 0.0) * lambda2
+    }
+    let k-max = 10
+    let points = array.range(1, k-max + 1).map(k => (k, var(k)))
+
+    // estimate of the asymptotic value
+    let asymptotic-value = var(50)
+
+    // variance function math expression
+    let var-math-expr(k) = {
+      let coefficients = array.range(0, k + 1).map(k => $cal(e)_#k$).join($+$)
+      $(#coefficients) lambda^2$
+    }
+    let var-ticks = array
+      .range(0, 3)
+      .map(k => {
+        let (_x, y) = points.at(k)
+        return (y, var-math-expr(k))
+      })
+
+    plot.plot(
+      size: (10, 5),
+      axis-style: "school-book",
+      x-label: [$k$],
+      x-min: 0.0,
+      x-max: k-max,
+      x-tick-step: 1.0,
+      y-label: [$EE[epsilon(t+k|k)^2]$],
+      y-min: 0.0,
+      y-max: asymptotic-value * 1.1,
+      y-tick-step: none,
+      y-ticks: (..var-ticks, (asymptotic-value, $"var"[y(t)]$)),
+      {
+        plot.add(points, mark: "x", style: (stroke: (dash: "dashed", paint: blue)))
+        plot.add-hline(asymptotic-value, style: (stroke: (dash: "dashed")))
+      },
+    )
+  }),
+)
+
+Now lets consider the trivial predictor $hat(y)(t+k|t) = EE[y(t)] = m_y$
+
+It's prediction error will be
+$ epsilon(t+k|t) = y(t+k) - hat(y)(t+k) = y(t+k) - m_y $
+and the variance
+$ EE[epsilon(t+k|t)^2] = EE[(y(t+k) - m_y)^2] = "var"[y(t)] $
+
+It follows that // TODO: explain why it follows
+$ "var"[e(t)] <= "var"[epsilon(t+k|t)] < "var"[y(t)] $
+
+== Initialization of the predictor
+
+#example[
+  Consider a predictor $ hat(y)(t+k|t) = 1 / (1 + c z^(-1)) y(t) $
+
+  We can write
+  $
+    & (1 + c z^(-1)) hat(y)(t+k|t) = y(t) \
+    & hat(y)(t+k|t) + c z^(-1) hat(y)(t+k|t) = y(t) \
+    & hat(y)(t+k|t) + c hat(y)(t+k-1|t-1) = y(t) \
+    & hat(y)(t+k|t) = - c hat(y)(t+k-1|t-1) + y(t)
+  $
+
+  Suppose we start collecting samples of $y(t)$ at $t=0$, then we would run into a problem:
+  in order to calculate $hat(y)(k+0|0)$
+  we would need $hat(y)(k-1|-1)$ which depends on $y(-1)$ which we do not have.
+]
+
+#problem[
+  How to initialize the predictor? That is, what value do we assign to $hat(y)(k-1|-1)$ ?
+]
+
+#solution[
+  We can assign any value, since $F(z) / C(z)$ si asymptotically stable, so any error will vanish rapidly.
+
+  A common solution is to assign $hat(y)(k-1|-1) = m_y$.
 ]
