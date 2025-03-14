@@ -6,10 +6,6 @@
   Given
   - a SSP $y(t)$ in canonical form
     $ y(t) = C(z) / A(z) e(t), quad e(t) ~ WN(mu, lambda^2) $
-
-    // FIXME: when doing prediction we know the model, right?
-    // When doing model identification we don't know the model.
-    // - Dario
     with $C(z)$, $A(z)$, $mu$, $lambda^2$ known.
 
   - a specific realization $y(0), y(1), dots y(t)$
@@ -92,11 +88,22 @@
 == Optimal predictor
 
 #problem(title: "Optimal predictor problem")[
-  Given a SSP $y(t)$, we would like to find the predictor $hat(y) (t+k|t)$ that minimizes $cal(J)(hat(y))$.
+  Given
+  - a SSP $y(t)$ in canonical form
+    $ y(t) = C(z) / A(z) e(t), quad e(t) ~ WN(0, lambda^2) $
+    with $C(z)$, $A(z)$, $mu$, $lambda^2$ known.
+
+  - a specific realization $y(0), y(1), dots y(t)$
+
+  we would like to find the predictor $hat(y) (t+k|t)$ that minimizes $cal(J)(hat(y))$
 
   Since we work with linear (ARMA/ARMAX) models, we will restrict ourselves to linear predictors.
   So we want to find the parameters $hat(alpha) = mat(hat(alpha)_1, hat(alpha)_2, dots)^transposed$ for a linear predictor, such that the mean squared prediction error is minimized
   $ hat(alpha) = argmin_alpha cal(J) (alpha) $
+]
+
+#note-box[
+  For now we are considering only processes with zero mean.
 ]
 
 #solution[
@@ -419,4 +426,49 @@ $ "var"[e(t)] <= "var"[epsilon(t+k|t)] < "var"[y(t)] $
   We can assign any value, since $F(z) / C(z)$ si asymptotically stable, so any error will vanish rapidly.
 
   A common solution is to assign $hat(y)(k-1|-1) = m_y$.
+]
+
+== Prediction of processes with non-zero mean
+
+#problem[
+  We want to find the optimal predictor for a precess
+  $ y(t) = C(z) / A(z) e(t), quad e(t) ~ WN(mu, lambda^2) $
+  with $mu != 0$.
+]
+
+#remark[
+  $y$ has mean value
+  $ EE[y(t)] = m_y = W(1) mu = C(1) / A(1) mu $
+]
+
+#solution[
+  We consider the de-biased processes
+  $
+    tilde(y)(t) &= y(t) - m_y = W(z) tilde(e)(t) \
+    tilde(e)(t) &= e(t) - mu
+  $
+  and the de-biased predictor from data
+  $
+    hat(tilde(y))(t+k|t) = F(z) / C(z) tilde(y)(t)
+  $
+
+  If we flip the definition of $tilde(y)$ we get
+  $ y(t) = tilde(y)(t) + m_y $
+  which means that
+  $ hat(y)(t+k|t) = hat(tilde(y))(t+k|t) + m_y $
+
+  If we expand the expression, we get
+  $
+    hat(y)(t+k|t) &= hat(tilde(y))(t+k|t) + m_y \
+    &= F(z) / C(z) tilde(y)(t) + m_y \
+    &= F(z) / C(z) (y(t) - m_y) + m_y \
+    &= F(z) / C(z) y(t) - F(z) / C(z) m_y + m_y
+  $
+
+  Since $m_y$ is a constant // TODO: cite the theorem
+  $ F(z) / C(z) m_y = F(1) / C(1) m_y $
+
+  And we can finally write
+  $ hat(y)(t+k|t) = F(z) / C(z) y(t) + "bias" $
+  where $"bias" = (1 - F(1) / C(1)) m_y$
 ]
