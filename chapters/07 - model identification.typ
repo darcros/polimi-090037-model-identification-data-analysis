@@ -81,7 +81,7 @@ When designing the experiment we need to:
   where $e(t) ~ WN(0, lambda^2)$.
 
   Then
-  $ theta = mat(a_1, a_2, dots, b_0, b_1, b_2, dots, c_0, c_1, c_2, dots)^transposed in Theta subset.eq RR^(m + n + p) $
+  $ theta = mat(a_1, a_2, dots, b_0, b_1, b_2, dots, c_0, c_1, c_2, dots)^T in Theta subset.eq RR^(m + n + p) $
 
   #note-box[
     $theta$ is not sufficient to fully specify the model.
@@ -164,7 +164,7 @@ $ A(z) = 1 + a_1 z^(-1) + a_2 z^(-2) + dots + a_n z^(-m) $
 $ B(z) = b_0 + b_1 z^(-1) + b_2 z^(-2) + dots + b_p-1 z^(-p+1) $
 
 Then the parameter vector is
-$ theta = mat(a_1, a_2, dots, a_m, b_0, b_1, dots, b_(p-1))^transposed in Theta subset.eq RR^(m + p) $
+$ theta = mat(a_1, a_2, dots, a_m, b_0, b_1, dots, b_(p-1))^T in Theta subset.eq RR^(m + p) $
 
 Let's call $m_theta$ the size of the parameter vector $theta$. In this case,
 $ m_theta = m + p $
@@ -193,14 +193,14 @@ $ cal(J)_N (theta) = 1 / N sum_(t=1)^N (y(t+1) - hat(y)(t|t-1, theta))^2 $
   $
   ]
 Using that structure, we can rewrite the predictor in a compact vectorial form:
-$ hat(y)(t|t-1) = theta^transposed phi(t) $
+$ hat(y)(t|t-1) = theta^T phi(t) $
 
 That reflects on the cost function:
 
 $ 
 cal(J)_N (theta) &= 1 / N sum_(t=1)^N (y(t+1) - hat(y)(t|t-1, theta))^2 \
-&=  1 / N sum_(t=1)^N (y(t+1) - theta^transposed phi(t) )^2 \
-&=  1 / N sum_(t=1)^N (y(t+1) - phi(t)^transposed theta )^2
+&=  1 / N sum_(t=1)^N (y(t+1) - theta^T phi(t) )^2 \
+&=  1 / N sum_(t=1)^N (y(t+1) - phi(t)^T theta )^2
 
 $
 

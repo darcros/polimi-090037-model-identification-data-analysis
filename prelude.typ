@@ -22,10 +22,11 @@
 // math and physics symbols
 #import "@preview/physica:0.9.5": *
 
+#show: super-T-as-transpose
+
 // custom math shortcuts
 
 #let argmin = $op("argmin", limits: #true)$
-#let transposed = $sans(upright(T))$
 
 #let WN = $op("WN")$
 #let AR = $op("AR")$

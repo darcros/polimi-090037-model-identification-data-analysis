@@ -98,7 +98,7 @@
   we would like to find the predictor $hat(y) (t+k|t)$ that minimizes $cal(J)(hat(y))$
 
   Since we work with linear (ARMA/ARMAX) models, we will restrict ourselves to linear predictors.
-  So we want to find the parameters $hat(alpha) = mat(hat(alpha)_1, hat(alpha)_2, dots)^transposed$ for a linear predictor, such that the mean squared prediction error is minimized
+  So we want to find the parameters $hat(alpha) = mat(hat(alpha)_1, hat(alpha)_2, dots)^T$ for a linear predictor, such that the mean squared prediction error is minimized
   $ hat(alpha) = argmin_alpha cal(J) (alpha) $
 ]
 
