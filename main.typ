@@ -17,6 +17,7 @@
   authors: (
     "Dario Crosa",
     "Francesco Genovese",
+    "Matteo Garzone"
   ),
 )
 
