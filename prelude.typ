@@ -12,6 +12,9 @@
 #import "@preview/theorion:0.3.2": *
 #import cosmos.rainbow: *
 
+// math and physics symbols
+#import "@preview/physica:0.9.5": *
+
 #let (properties-counter, properties-box, properties, show-properties) = make-frame(
   "properties",
   (en: "Properties", it: "Proprietà"),
