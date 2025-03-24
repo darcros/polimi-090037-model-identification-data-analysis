@@ -439,3 +439,55 @@ We can prove that the covariance function of the unbiased version of a process i
   $gamma_y (tau) &= EE[y(t) - m_y)(y(t-tau) - E[y(t-tau))] \
   &=  EE[tilde(y)(t) tilde(y)(t-tau)] \ &= gamma_tilde(y)(tau)$
 ]
+
+#theorem(title: "of the gain")[
+
+Using the unbiased version of the process we can get an equivalent representation
+#{
+    import fletcher: diagram, node, edge
+    figure(
+      diagram(
+        node-shape: "rect",
+        node-stroke: 1pt,
+        edge((0, 0), "r", "-|>")[$tilde(e)(t)$],
+        edge((1,1), "u", "-|>")[$m_e$],
+        edge((1, 0), "r", "-|>")[$e(t)$],
+
+        node((2, 0))[$G(z)$],
+        edge((2, 0), "rr", "-|>")[$y(t)$],
+        node((1, 0), shape: "circle", inset: 2pt, sym.plus.minus),
+
+      ),
+    )
+  }
+#{
+    import fletcher: diagram, node, edge
+    figure(
+      diagram(
+        node-shape: "rect",
+        node-stroke: 1pt,
+        edge((0, 0), "rr", "-|>")[$tilde(e)(t)$],
+
+        node((2, 0))[$G(z)$],
+        edge((2, 0), "rrr", "-|>")[$tilde(y)(t)$],
+        edge((0,1), "rr", "-|>")[$u= m_e$],
+        edge((2, 1), "rrr", "-")[$U = m_y = EE[y(t)]$],
+        edge((5, 1), "u", "-|>"),
+
+        node((2, 1))[$G(z)$],
+
+        node((5, 0), shape: "circle", inset: 2pt, sym.plus.minus),
+                edge((5, 0), "r", "-|>")[$y(t)$],
+
+
+      ),
+    )
+  }
+
+  We can use this to compute the expected value of our stochastic process
+  
+  At *steady state* we have that
+
+  $EE[y(t)] = lim_(t->1) = G(z) dot m_e = G(1) dot U$
+
+]
