@@ -101,3 +101,7 @@ $Gamma_y (omega) &= |W(e^(j omega))|^2 Gamma_e(omega) \
 #remark(title: "Remark: poles and zeroes on the unit disk and the spectral density")[
   If $e^(j omega)$ is a pole of $W(z)$ then $Gamma_y(omega) = +infinity$
 
+  If $e^(j omega)$ is a zero of $W(z)$ then $Gamma_y(omega) = 0$.
+
+  If $e^(j omega)$ is nearing a *pole* or a *zero* of $W(z)$ then $Gamma_y(omega) -> infinity "or" 0 $ 
+]
