@@ -45,7 +45,7 @@ So we analyze the covariance function $gamma$ instead.
 
 // FIXME: is this really a definition? or does this just follow from the definition of Gamma?
 #definition(title: "Inverse DFT")[
-  $ gamma_y(tau) = cal(F)^(-1){Gamma(omega)} = 1 / (2 pi) integral_(-pi)^(+pi) Gamma(omega) e^(+j omega tau) d w $
+  $ gamma_y (tau) = cal(F)^(-1){Gamma(omega)} = 1 / (2 pi) integral_(-pi)^(+pi) Gamma(omega) e^(+j omega tau) d w $
 
   Note the exponent of $e$, it is *positive*.
 ]
