@@ -68,7 +68,9 @@ So we analyze the covariance function $gamma$ instead.
   - $v(t)$ a SSP
   - $W(z)$ an asymptotically stable filter
 
-  Then $ Gamma_y(omega) = |W(e^(j omega))|^2 Gamma_v(omega) $
+  Then we can reconduce the spectral density of the output to the spectral density of the input.
+  $ Gamma_y(omega) = |W(e^(j omega))|^2 Gamma_v(omega) $
+]
 ]
 
 #remark[
