@@ -415,3 +415,27 @@ If we apply a non-linear function to an $ARMAX$ model we get a $"N-ARMAX"$ model
     quad )
   $
 ]
+
+=== Unbiased models
+When calculating the covariance function of a process, it's often useful to define the unbiased version of the process.
+
+#definition(title: "Unbiased model")[
+  Let $y(t) ~ ARMA(m, n)$, $e(t) ~ WN(m_e, lambda^2)$
+  
+  $ tilde(e)(t) = e(t) - m_e$
+
+  $tilde(y)(t) = y(t) - m_y$ is the unbiased version of the process
+]
+
+We can prove that the covariance function of the unbiased version of a process is the same as the covariance function of the original process.
+
+#theorem(title: "Covariance function of unbiased model")[
+  $EE[e(t)e(t- tau)] = 0$ if $EE[e(t)] = 0$
+
+  $EE[ underbrace((e(t) - m_e), tilde(e)(t)) underbrace(e(t- tau) - EE[e(t-tau)], tilde(e)(t- tau))]  = 0 forall tau != 0$ 
+
+  Therefore
+
+  $gamma_y (tau) &= EE[y(t) - m_y)(y(t-tau) - E[y(t-tau))] \
+  &=  EE[tilde(y)(t) tilde(y)(t-tau)] \ &= gamma_tilde(y)(tau)$
+]
