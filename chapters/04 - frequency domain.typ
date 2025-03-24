@@ -71,6 +71,10 @@ So we analyze the covariance function $gamma$ instead.
   Then we can reconduce the spectral density of the output to the spectral density of the input.
   $ Gamma_y(omega) = |W(e^(j omega))|^2 Gamma_v(omega) $
 ]
+#remark(title: "Remark: Gamma function of a white noise")[
+  From the definition of *inverse DFT*, if $u(t)$ is a *white noise* process,  the only non-zero term for $gamma_y (tau)$ is at $tau = 0$.
+  
+   $ Gamma_u (omega) = gamma_u (0) dot e^(- j omega 0) = gamma_u (0)= lambda^2 forall omega $
 ]
 
 #remark[
