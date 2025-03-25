@@ -118,7 +118,8 @@ $Gamma_y (omega) &= |W(e^(j omega))|^2 Gamma_e(omega) \
 
   Then
   $ Gamma_y(omega) = |W(e^(j omega))|^2 Gamma_e(omega) = |(e^(j omega)-z_("zero")) / (e^(j omega)-z_("pole"))|^2 lambda^2 = |overline(a) / overline(b)|^2 lambda^2 = |a / b|^2 lambda^2 $
-  $ $
+  
+  Finally we compute the value of $a$ and $b$ for each common value of $omega$.
   //TODO add figure
 ]
 
