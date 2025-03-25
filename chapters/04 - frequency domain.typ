@@ -105,3 +105,20 @@ $Gamma_y (omega) &= |W(e^(j omega))|^2 Gamma_e(omega) \
 
   If $e^(j omega)$ is nearing a *pole* or a *zero* of $W(z)$ then $Gamma_y(omega) -> infinity "or" 0 $ 
 ]
+
+
+#note-box( title: "Note: computing the spectrum of a SSP"
+)[
+  A fast way to compute an approximate value of $Gamma_y(omega)$ is to compute the poles and zeroes of $W(z)$ and use the distances from the poles and zeroes to $e^(j omega)$ to compute the values of $Gamma_y(omega)$ in the most common $Omega$ values. (e.g. $0, pi/2, pi, pi$)
+
+  Assuming our transfer function has one zero and one pole $W(z) = (z-z_("zero")) / (z-z_("pole")) $
+
+  Let
+  $ overline(a) = e^(j omega)-z_("zero") $ and $ overline(b) = e^(j omega)-z_("pole") $
+
+  Then
+  $ Gamma_y(omega) = |W(e^(j omega))|^2 Gamma_e(omega) = |(e^(j omega)-z_("zero")) / (e^(j omega)-z_("pole"))|^2 lambda^2 = |overline(a) / overline(b)|^2 lambda^2 = |a / b|^2 lambda^2 $
+  $ $
+  //TODO add figure
+]
+
