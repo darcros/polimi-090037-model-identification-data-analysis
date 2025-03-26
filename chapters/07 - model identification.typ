@@ -190,7 +190,7 @@ $ cal(J)_N (theta) = 1 / N sum_(t=1)^N (y(t+1) - hat(y)(t|t-1, theta))^2 $
   Given the class of predictor $hat(cal(M))(theta)$, it's called *regressor* the vector:
   $
     phi(t) = [y(t-1), y(t-2), dots, u(t-d), dots, u(t-d-p+1)]
-  $
+  $ namely, the vector of data points we're going to multiply by the chosen parameters to compute our our predictor.
   ]
 Using that structure, we can rewrite the predictor in a compact vectorial form:
 $ hat(y)(t|t-1) = theta^T phi(t) $
