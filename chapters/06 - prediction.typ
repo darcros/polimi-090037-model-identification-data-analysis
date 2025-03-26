@@ -81,7 +81,7 @@
   The MSP of $hat(y)$ is
   $
     cal(J) (hat(y)) &= EE[epsilon(t+k|t)^2] \
-    &= EE[(t(t+k) - hat(y) (t+k|t))^2]
+    &= EE[(y(t+k) - hat(y) (t+k|t))^2]
   $
 ]
 
