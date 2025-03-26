@@ -127,7 +127,7 @@
   // how exactly do we re-arrange the w_i and alpha_i to get beta_i?
 
   Then, we reformulate the optimization problem wrt $alpha$ in a new optimization problem wrt $beta$
-  $ cal(V) = EE[(y(t+k) - hat(y)(t-k|t, beta))^2] $
+  $ cal(V) = EE[(y(t+k) - hat(y)(t+k|t, beta))^2] $
   we are now looking for $hat(beta) = argmin_beta cal(V) (beta)$
 
   Let's consider $y(t+k)$ alone, we can split it into two parts
