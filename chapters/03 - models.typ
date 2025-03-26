@@ -306,7 +306,7 @@ Then we can calculate the mean value $m$ and covariance function $gamma(tau)$ by
 //TODO add graphical representation of possible realizations given the form of the covariance functions (smooth and nervous processes)
 
 #theorem[
-  Let $e(t) ~ WN(0, lambda^2)$ and $y(t) = e(t) + a e(t-1) ~ AR(1) $
+  Let $e(t) ~ WN(0, lambda^2)$ and $y(t) = e(t) + a y(t-1) ~ AR(1) $
 
   Then $EE[y(t-tau) e(t)] = 0, forall tau >= 0$
 ] <thm:null-expected-value>
