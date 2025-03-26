@@ -147,9 +147,8 @@ We will consider two situations:
 
 // TODO: explain better the assumptions, why they could be wrong, what happens if they are
 During the process we made a few assumptions that must be verified in order to validate the quality of the model:
-- the system $cal(S)$ lies within the model class $cal(M)_theta$
-- $m$, $n$, $p$ are specified a priori
-- data have been "correctly" selected (they are informative)
+- the system $cal(S)$ lies within the model class $cal(M)_theta$, meaning that the model has the same number of parameters, in the same structure and elevated to the correct magnitude.
+- $m$, $n$, $p$ are specified a priori to data have been "correctly" selected (they are informative)
 
 == Identification of ARX models
 
