@@ -310,14 +310,14 @@
   ]
 ]
 
-#remark[
+#remark( title: "Remark: Predictors in practice" )[
   How can we use the predictor from data in practice?
   Since our Stochastic process is stationary, we have that: 
     $ hat(y)(t+k|t) = F(z) / C(z) y(t) arrow.r.double.long  hat(y)(t|t-k) = F(z) / C(z) y(t-k) $ 
   This means we can get a predicition for the next possible value of our time-series. and we can compute it with data that we have, $y(t-k)$.
 ]
 
-#remark[
+#remark(title: "Remark: worsening predictions")[
   The quality of the prediction gets worse with increasing $k$ since going forward will mean considering less samples $angle.l y(0), dots, y(t) angle.r arrow.r.long^(k arrow.t) angle.l y(k), y(t) angle.r$ since we don't have any data after $y(t)$
 ]
 == Analysis of the prediction error
