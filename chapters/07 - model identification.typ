@@ -95,7 +95,7 @@ When designing the experiment we need to:
   ]
 
   #note-box[
-    $Theta != RR^(m + n + p)$ because some values in $RR^(m + n + p)$ are not admissible.
+    $Theta != RR^(m + n + p)$ because some values in $RR^(m + n + p)$ are not admissible since we admit only canonical representations (?).
 
     Consider $y(t) = a_1 y(t-1) + e(t) ~ AR(1) = ARMAX(1, 0, 0, 0)$
 
@@ -109,7 +109,7 @@ When designing the experiment we need to:
 
 === Choice of the identification criterion <model-ident:step-3>
 
-We use the _predictive approach_. // TODO: explain a little bit better
+We use a _predictive approach_. We assume our model is good if the prediction error given by the predictor we have chosen to estimate our future value of our time series is low.// TODO: explain a little bit better
 
 Our ideal objective would be
 $ cal(J)(theta) = EE[(y(t+1) - hat(y)(t+1|t, theta))^2] $
