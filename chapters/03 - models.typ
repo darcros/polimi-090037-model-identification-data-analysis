@@ -308,7 +308,7 @@ Then we can calculate the mean value $m$ and covariance function $gamma(tau)$ by
 #theorem[
   Let $e(t) ~ WN(0, lambda^2)$ and $y(t) = e(t) + a y(t-1) ~ AR(1) $
 
-  Then $EE[y(t-tau) e(t)] = 0, forall tau >= 0$
+  Then $EE[y(t-tau) e(t)] = 0, forall tau > 0$
 ] <thm:null-expected-value>
 
 #remark[
