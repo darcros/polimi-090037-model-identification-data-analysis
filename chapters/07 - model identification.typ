@@ -122,10 +122,10 @@ $ cal(J)(theta) = 1 / N sum_(t=1)^N (y(t+1) - hat(y)(t|t-1, theta))^2 $
 #remark[
   We "look" 1-step ahead (instead of $2, 3, dots, k$) because
 
-  $ epsilon(t+k|t) = t(t+k) - hat(y)(t+k|t) $
+  $ epsilon(t+k|t) = y(t+k) - hat(y)(t+k|t) $
   $ "var"[e(t)] <= "var"[epsilon(t+k|t)] <= "var"[y(t)] $
 
-  if the model is exact and we computer the optial 1-step ahead error
+  if the model is exact and we compute the optimal 1-step ahead error
   $ epsilon(t+k|t) = e(t) $
   and
   $ "var"[epsilon(t+1|t)] = "var"[e(t)] = lambda^2 $
@@ -212,13 +212,13 @@ $
 // TODO: plot Jn in R^3 as a paraboloid and show the global optimal
 
 To find the global optimal $hat(theta)_N$ in general, the following two conditions must hold:
-- $hat(theta)_N$ is a stationary point of $cal(J)_N$, therefore the gradient must be null:
+- $hat(theta)_N$ is a *stationary point* of $cal(J)_N$, therefore the gradient must be null:
 
 $ evaluated(pdv(cal(J)_N (theta), theta))_(theta = hat(theta)_N) = 0 $
 
 
 
-- $hat(theta)_N$ is a minimum point of $cal(J)_N$, therefore the hessian matrix must be positive definite:
+- $hat(theta)_N$ is a *minimum point* of $cal(J)_N$, therefore the hessian matrix must be positive definite:
 
 $ evaluated(pdv(cal(J)_N (theta), theta, 2))_(theta = hat(theta)_N) succ 0 $
 
