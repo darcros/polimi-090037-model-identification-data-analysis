@@ -62,6 +62,7 @@
 ]
 
 #definition(title: "Linear predictor")[
+  An "optimal" linear predictor contains both information about the model information $angle.l alpha_0, alpha_1, dots angle.r$ and the data $ angle.l y(t), y(t-1), dots angle.r$.
   $
     hat(y)(t+k|t) &= alpha_0 y(t) + alpha_1 y(t - 1) + dots \
     &= sum_(i=0)^(+infinity) (alpha_i) y(t-i)
