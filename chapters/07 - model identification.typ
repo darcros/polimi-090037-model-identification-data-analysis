@@ -292,5 +292,102 @@ that means that two cases can occour:
 - if $pdv(cal(J)_N (theta), theta, 2) = 0 $ (degenerate case) the hessian matrix is singular and we have an infinite number of minimum points.
 
 There could be two reasons behind the degenerate case:
-- *experimantal identifiability issue*: data are not representive of the full underlying physical process;
+- *experimantal identifiability issue*: data are not representive of the full underlying physical process; This means the information matrix $phi(t)phi(t)^T$ is not all informative and some data is the linear combination of some other data.
 - *structural identifiability issue*: the selected model class is too large, there is more than one model that can fit the data.
+
+
+
+== Identification of ARMA(X) models
+
+$ cal(M)(theta): quad y(t) = B(z)/A(z) u(t-d) + C(z)/A(z) e(t), quad e(t) ~ WN(0, lambda^2) $
+With 
+- $C(z) = 1+ c_1 z^(-1) + c_2 z^(-2) + dots + c_n z^(-n)$
+- $A(z) = 1 - ( a_1 z^(-1) + a_2 z^(-2) + dots + a_m z^(-m)) $
+- $B(z) = b_0 + b_1 z^(-1) + b_2 z^(-2) + dots + b_p-1 z^(-p+1)$
+
+Then the parameter vector is
+$ theta = mat(a_1, a_2, dots, a_m, b_0, b_1, dots, b_(p-1), c_1, c_2, dots, c_n)^T in Theta subset.eq RR^(m + p + n) $
+Let's call $n_theta$ the size of the parameter vector $theta$. 
+
+We have the same loss function: 
+$
+  J = 1/N sum_(t=1)^N (y(t) - y(t-1|t, theta))^2 
+$ 
+
+We're interested in the one step ahead predictor $k=1$.
+
+
+#let longdiv(all-columns, ..cells) = {
+  let longdiv = grid
+  let cols = if type(all-columns) == array {
+    all-columns.len()
+  } else if type(all-columns) == int {
+    all-columns
+  } else {
+    1
+  }
+  set grid(
+    columns: cols,
+    inset: 5pt,
+    align: right,
+    stroke: (x, y) => (
+      // Add left stroke to the last column
+      left: if x == cols - 1 { black },
+
+      bottom: if (
+        // Add bottom stroke to the top right cell
+        y == 0 and x == cols - 1
+  
+        // Add bottom stroke every two rows (calc.odd check),
+        // but for one less column each time
+        or x < cols - 1 and calc.odd(y) and x + 1 >= y / 2
+      ) {
+        black
+      }
+    ),
+  )
+  grid(..cells)
+}
+
+$ longdiv(
+  #2,  C(z), A(z), 
+  -A(z), E(z) = 1,
+  C(z)- A(z)
+) $
+
+Let's call $F(z)z^(-k) := C(z)- A(z)$ the rest of our long division.
+Our predictor is therefore:
+$ hat(y)(t|t-1) = (C(z)-A(z))/C(z) y(t) + B(z)/C(z) u(t-d) $
+
+We can compute the prediction error: 
+$
+  epsilon(t|t-1, theta) = A(z)/C(z) y(t) - B(z)/C(z)u(t-d)
+$
+
+#note-box()[We cannot apply OLS since $hat(theta)$ appears in the denominator of the prediction appears in C(z), so in the denominator. 
+We cannot write $hat(y)(t|t-1, theta)$ as a linear function $phi(t)^T theta$. 
+We have to use non linear function of $theta$ so to optimize the prediction error we're going to use an *heuristic / iterative numerical appproach*]
+
+#note-box()[
+Iterative algorithms are guaranteed to converge to local minimima not global minima.
+]
+
+To update our parameters, there are various strategies. We could use *Newtons method* and find the tangent paraboloid around the current iteration of the estimate of , our parameter $Theta^((i))$, then take the minimum of the computed paraboloid as the new estimate of $J_N (theta)$
+
+//TODO maybe add figure of parabolic gradient descent
+
+$ nu (Theta) = J_N (Theta^((i))) + pdv(J_N (Theta), Theta)_(Theta = Theta^((i))) (Theta - Theta^((i))) + 1/2 (Theta - Theta^((i)))^T pdv(J_N (Theta), Theta, 2)_(Theta = Theta^((i))) (Theta - Theta^((i))) $
+
+//TODO add the computation notes if we care
+
+=== Results 
+After computing the expressions of the Gradient and Hessian matrix, we can choose to update our parameters $theta^((i))$ always in the direction of the gradient, since it's going to give us the direction toward a stationary point of our loss function, and use the hessian matrix convex, hopefully or approximated definite positive to go towards a minima. 
+
+We can choose different strategies to change the magnitude of our jump: 
+- *Newton's rule*: to have the learning rate of the algorithm according to the curvature of the paraboloid.
+$ theta^((i+1)) = theta^((i)) - ["hessian"]^(-1) dot "gradient" $ 
+- *Quasi-Newton*: to have the learning rate of the algorithm according to the curvature of the paraboloid.
+ $ theta^((i+1)) = theta^((i)) - ["positive terms of the hessian"]^(-1) dot "gradient" $ 
+- *Gradient descent*: to have a scalar and fixed learning rate. Fastest and simplest method.
+$ theta^((i+1)) = theta^((i)) - eta ["gradient"] $
+
