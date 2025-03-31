@@ -33,3 +33,4 @@
 #include "chapters/05 - representations.typ"
 #include "chapters/06 - prediction.typ"
 #include "chapters/07 - model identification.typ"
+#include "chapters/08 - model validation.typ"
