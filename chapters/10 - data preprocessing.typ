@@ -65,29 +65,48 @@ $ y(t +1 | t) = hat(m) + hat(k) t + hat(tilde(y))(t +1 | t) $.
     import cetz.draw: *
     import cetz-plot: *
     import "../util.typ": random-series
-    let rng = gen-rng(2)
-    let (rng, realization) = random-series(rng, 50, from: 0, to: 10, min: -5, max: 5)
-    let trend(x) = (
-      return 20 * calc.sin(x) + 10 * calc.sin(2 * x) + 5 * calc.sin(4 * x)
-    )
 
-    let seasonal_trend = range(-2, 10).map(x => (x, trend(x)))
-    let trended_realization = range(0, 50).map(x => (x / 5, trend(x / 5) + realization.at(x).at(1)))
+    let samples = 100
+
+    let trend(x) = 20 * calc.sin(0.1 * x) + 10 * calc.sin(0.2 * x) + 5 * calc.sin(0.4 * x)
+
+    let rng = gen-rng(2)
+    let (rng, ssp-realization) = random-series(rng, samples, from: 0, to: samples, min: -5, max: 5)
+
+    let trend-realization = ssp-realization.map(v => {
+      let (t, value) = v
+      return (t, trend(t))
+    })
+
+    let trended-realization = ssp-realization.map(v => {
+      let (t, value) = v
+      return (t, value + trend(t))
+    })
 
     plot.plot(
-      size: (6, 6),
+      size: (10, 6),
       axis-style: "school-book",
-      x-min: -2,
-      x-max: +10,
       y-max: +30,
-      x-tick-step: none,
+      // x-tick-step: none,
       x-label: [$t$],
       y-tick-step: none,
       y-label: [$v(t, overline(s))$],
       {
-        plot.add(label: [SSP realization $tilde(y)(t)$], realization, line: "spline")
-        plot.add(label: [seasonal trend $k sin(t)$], seasonal_trend, line: "spline")
-        plot.add(label: [trended realization $y(t)$], trended_realization, line: "spline")
+        plot.add(
+          label: [SSP realization $tilde(y)(t)$],
+          ssp-realization,
+          // line: "spline",
+        )
+        plot.add(
+          label: [seasonal trend $k sin(t)$],
+          trend-realization,
+          // line: "spline",
+        )
+        plot.add(
+          label: [trended realization $y(t)$],
+          trended-realization,
+          // line: "spline",
+        )
       },
     )
   }),
@@ -103,46 +122,52 @@ The way to remove seasonality, and therefore periodic signals from the data, is 
     import cetz.draw: *
     import suiji: gen-rng
     import "../util.typ": random-series
+
+    let samples = 500
+
+    let trend(x) = 20 * calc.sin(0.1 * x) + 10 * calc.sin(0.2 * x) + 5 * calc.sin(0.4 * x)
+
     let rng = gen-rng(2)
-    let (rng, realization) = random-series(rng, 50, from: 0, to: 10, min: -5, max: 5)
+    let (rng, ssp-realization) = random-series(rng, samples, from: 0, to: samples, min: -5, max: 5)
 
-    let trend(x) = (
-      return 20 * calc.sin(x) + 10 * calc.sin(2 * x) + 5 * calc.sin(4 * x)
-    )
+    let trended-realization = ssp-realization.map(v => {
+      let (t, value) = v
+      return (t, trend(t))
+    })
 
-    let seasonal_trend = range(-2, 10).map(x => (x, trend(x)))
-    let trended_realization = range(0, 50).map(x => (x / 5, trend(x / 5) + realization.at(x).at(1)))
+    let dft(omega) = {
+      let sum = 0
+      for (t, y) in trended-realization {
+        let re = y * calc.cos(-omega * t)
+        let im = calc.sin(-omega * t)
+        let mod = (re * re + im * im)
+        sum += mod
+      }
 
-    let dft(omega) = (
-      (1 / trended_realization.len())
-        * trended_realization
-          .map(value => {
-            let (t, y) = value
+      return sum / trended-realization.len()
+    }
 
-
-            let re = y * calc.cos(omega * t)
-            let im = y * calc.sin(omega * t)
-
-            let mod = (re * re + im * im)
-            return mod
-          })
-          .sum()
-    )
-
-
-    let dft_results = range(0, 200).map(omega => (omega / 100, dft(omega / 100)))
+    let dft-samples = 1000
+    let omega-min = 0
+    let omega-max = +0.5
+    let step = (omega-max - omega-min) / dft-samples
+    let dft-samples = range(0, dft-samples).map(i => {
+      let omega = i * step + omega-min
+      return (omega, dft(omega))
+    })
 
     plot.plot(
-      size: (6, 6),
+      size: (12, 6),
       axis-style: "school-book",
-      x-min: 0,
-      x-tick-step: none,
+      x-format: plot.formats.multiple-of,
       x-label: [Frequency],
-      y-tick-step: none,
+      y-min: 0,
       y-label: [Magnitude],
       {
-        plot.add(label: [DFT Magnitude], dft_results, line: "spline")
+        plot.add(label: [DFT Magnitude], dft-samples)
+        plot.add-vline(0.1, 0.2, 0.4)
       },
     )
   }),
 )
+  
