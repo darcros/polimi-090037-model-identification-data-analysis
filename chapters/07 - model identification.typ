@@ -152,7 +152,7 @@ During the process we made a few assumptions that must be verified in order to v
 
 == Identification of ARX models
 
-$ cal(M)(theta): quad y(t) = B(z)/A(z) u(t-d) + bold(1)/A(z) e(t), quad e(t) ~ WN(0, lambda^2) $
+$ cal(M)(theta): quad y(t) = B(z) / A(z) u(t-d) + bold(1) / A(z) e(t), quad e(t) ~ WN(0, lambda^2) $
 
 #note-box[
   The ARX model is a special case of the ARMAX model with $C(z) = 1$.
@@ -169,13 +169,14 @@ Let's call $m_theta$ the size of the parameter vector $theta$. In this case,
 $ m_theta = m + p $
 
 We can rewrite the model as
-$ cal(M)(theta): quad& A(z)y(t) = B(z)u(t-d) + e(t) \
+$
+  cal(M)(theta): quad& A(z)y(t) = B(z)u(t-d) + e(t) \
   & bold(y(t) - y(t)) + A(z)y(t) = B(z)u(t-d) + e(t) \
   & y(t) = (1- A(z))y(t) + B(z)u(t-d) + e(t)
 $
-  
+
 $
-y(t) = &underbrace((a_1 z^(-1) + dots + a_m z^(-m))y(t) + (b_0 + b_1 z^(-1) + dots + b_(p-1) z^(-p+1))u(t-d), "Available at time" t-1"," \ "predictable") + &underbrace(e(t), "Not available," \ "prediction error")
+  y(t) = &underbrace((a_1 z^(-1) + dots + a_m z^(-m))y(t) + (b_0 + b_1 z^(-1) + dots + b_(p-1) z^(-p+1))u(t-d), "Available at time" t-1"," \ "predictable") + &underbrace(e(t), "Not available," \ "prediction error")
 $
 
 Isolating the predictable part of the model, we obtain the *predictor* of the class of models $ hat(cal(M))(theta)$:
@@ -190,22 +191,21 @@ $ cal(J)_N (theta) = 1 / N sum_(t=1)^N (y(t+1) - hat(y)(t|t-1, theta))^2 $
   $
     phi(t) = [y(t-1), y(t-2), dots, u(t-d), dots, u(t-d-p+1)]
   $ namely, the vector of data points we're going to multiply by the chosen parameters to compute our our predictor.
-  ]
+]
 Using that structure, we can rewrite the predictor in a compact vectorial form:
 $ hat(y)(t|t-1) = theta^T phi(t) $
 
 That reflects on the cost function:
 
-$ 
-cal(J)_N (theta) &= 1 / N sum_(t=1)^N (y(t+1) - hat(y)(t|t-1, theta))^2 \
-&=  1 / N sum_(t=1)^N (y(t+1) - theta^T phi(t) )^2 \
-&=  1 / N sum_(t=1)^N (y(t+1) - phi(t)^T theta )^2
-
+$
+  cal(J)_N (theta) &= 1 / N sum_(t=1)^N (y(t+1) - hat(y)(t|t-1, theta))^2 \
+  &= 1 / N sum_(t=1)^N (y(t+1) - theta^T phi(t) )^2 \
+  &= 1 / N sum_(t=1)^N (y(t+1) - phi(t)^T theta )^2
 $
 
 #remark[
   Since $hat(y)$ is linear in $theta$, $cal(J)_N$ is *quadratic* in $theta$. Hence, the global minimum $hat(theta)_N$ is unique.\
-  For example, with $m_theta = 2$, $cal(J)_N$ is a paraboloid in $RR^3$. 
+  For example, with $m_theta = 2$, $cal(J)_N$ is a paraboloid in $RR^3$.
 ]
 
 // TODO: plot Jn in R^3 as a paraboloid and show the global optimal
@@ -223,30 +223,23 @@ $ evaluated(pdv(cal(J)_N (theta), theta, 2))_(theta = hat(theta)_N) succ 0 $
 
 Let us analyze the gradient:
 
-$ 
-pdv(cal(J)_N (theta), theta) &= vec(pdv(cal(J)_N (theta), a_1), dots, pdv(cal(J)_N (theta), b_(p-1))) \
-&=  dv(,theta)[cal(J)_N (theta)] \
-&=  dv(,theta)[1 / N sum_(t=1)^N (y(t) - phi(t)^TT theta )^2]\
-// invert summation and derivative
-&= 1 / N sum_(t=1)^N dv(,theta)[(y(t) - phi(t)^TT theta )^2]\
-&= 1 / N sum_(t=1)^N 2(y(t) - phi(t)^TT theta ) underbrace((dv(,theta)[y(t) - phi(t)^TT theta ]), bold(-phi(t)) \ "Not transposed, to make" \ "the gradient a column vector")\
-
-&= - 2 / N sum_(t=1)^N phi(t)(y(t) - phi(t)^TT theta )\
-
+$
+  pdv(cal(J)_N (theta), theta) &= vec(pdv(cal(J)_N (theta), a_1), dots, pdv(cal(J)_N (theta), b_(p-1))) \
+  &= dv(,theta)[cal(J)_N (theta)] \
+  &= dv(,theta)[1 / N sum_(t=1)^N (y(t) - phi(t)^TT theta )^2]\
+  // invert summation and derivative
+  &= 1 / N sum_(t=1)^N dv(,theta)[(y(t) - phi(t)^TT theta )^2]\
+  &= 1 / N sum_(t=1)^N 2(y(t) - phi(t)^TT theta ) underbrace((dv(,theta)[y(t) - phi(t)^TT theta ]), bold(-phi(t)) \ "Not transposed, to make" \ "the gradient a column vector")\
+  &= - 2 / N sum_(t=1)^N phi(t)(y(t) - phi(t)^TT theta )\
 $
 
 Now, let's set the gradient to zero and find the optimal $hat(theta)_N$:
 
 $
-evaluated(pdv(cal(J)_N (theta), theta))_(theta = hat(theta)_N) &= 0\
-- 2 / N sum_(t=1)^N phi(t)(y(t) - phi(t)^TT hat(theta)_N ) &= 0\
-
-cancel(- 2 / N) sum_(t=1)^N phi(t)y(t) &= cancel(- 2 / N) sum_(t=1)^N phi(t)phi(t)^TT hat(theta)_N\
-
-[sum_(t=1)^N phi(t)phi(t)^TT] hat(theta)_N &= sum_(t=1)^N phi(t)y(t)\
-
-
-
+  evaluated(pdv(cal(J)_N (theta), theta))_(theta = hat(theta)_N) &= 0\
+  - 2 / N sum_(t=1)^N phi(t)(y(t) - phi(t)^TT hat(theta)_N ) &= 0\
+  cancel(- 2 / N) sum_(t=1)^N phi(t)y(t) &= cancel(- 2 / N) sum_(t=1)^N phi(t)phi(t)^TT hat(theta)_N\
+  [sum_(t=1)^N phi(t)phi(t)^TT] hat(theta)_N &= sum_(t=1)^N phi(t)y(t)\
 $
 
 If $sum_(t=1)^N phi(t)phi(t)^TT$, called *information matrix*, is non-singular, then we can solve for $hat(theta)_N$:
@@ -285,7 +278,7 @@ $
   &= 2 / N sum_(t=1)^N (phi(t)^TT x)^2 >= 0 quad forall x != 0\
 $
 
-We actually proved that 
+We actually proved that
 $ x^T pdv(cal(J)_N (theta), theta, 2) x >= 0 quad forall x != 0 $
 that means that two cases can occour:
 - if $pdv(cal(J)_N (theta), theta, 2) succ 0 $ the hessian matrix is positive definite and $hat(theta)_N$ is a minimum;
@@ -299,20 +292,20 @@ There could be two reasons behind the degenerate case:
 
 == Identification of ARMA(X) models
 
-$ cal(M)(theta): quad y(t) = B(z)/A(z) u(t-d) + C(z)/A(z) e(t), quad e(t) ~ WN(0, lambda^2) $
-With 
+$ cal(M)(theta): quad y(t) = B(z) / A(z) u(t-d) + C(z) / A(z) e(t), quad e(t) ~ WN(0, lambda^2) $
+With
 - $C(z) = 1+ c_1 z^(-1) + c_2 z^(-2) + dots + c_n z^(-n)$
-- $A(z) = 1 - ( a_1 z^(-1) + a_2 z^(-2) + dots + a_m z^(-m)) $
+- $A(z) = 1 - ( a_1 z^(-1) + a_2 z^(-2) + dots + a_m z^(-m))$
 - $B(z) = b_0 + b_1 z^(-1) + b_2 z^(-2) + dots + b_p-1 z^(-p+1)$
 
 Then the parameter vector is
 $ theta = mat(a_1, a_2, dots, a_m, b_0, b_1, dots, b_(p-1), c_1, c_2, dots, c_n)^T in Theta subset.eq RR^(m + p + n) $
-Let's call $n_theta$ the size of the parameter vector $theta$. 
+Let's call $n_theta$ the size of the parameter vector $theta$.
 
-We have the same loss function: 
+We have the same loss function:
 $
-  J = 1/N sum_(t=1)^N (y(t) - y(t-1|t, theta))^2 
-$ 
+  J = 1 / N sum_(t=1)^N (y(t) - y(t-1|t, theta))^2
+$
 
 We're interested in the one step ahead predictor $k=1$.
 
@@ -333,61 +326,62 @@ We're interested in the one step ahead predictor $k=1$.
     stroke: (x, y) => (
       // Add left stroke to the last column
       left: if x == cols - 1 { black },
-
       bottom: if (
         // Add bottom stroke to the top right cell
-        y == 0 and x == cols - 1
-  
-        // Add bottom stroke every two rows (calc.odd check),
-        // but for one less column each time
-        or x < cols - 1 and calc.odd(y) and x + 1 >= y / 2
+        y == 0 and x == cols - 1 // Add bottom stroke every two rows (calc.odd check),
+          // but for one less column each time
+          or x < cols - 1 and calc.odd(y) and x + 1 >= y / 2
       ) {
         black
-      }
+      },
     ),
   )
   grid(..cells)
 }
 
-$ longdiv(
-  #2,  C(z), A(z), 
+$
+  longdiv(
+  #2,  C(z), A(z),
   -A(z), E(z) = 1,
   C(z)- A(z)
-) $
+)
+$
 
 Let's call $F(z)z^(-k) := C(z)- A(z)$ the rest of our long division.
 Our predictor is therefore:
-$ hat(y)(t|t-1) = (C(z)-A(z))/C(z) y(t) + B(z)/C(z) u(t-d) $
+$ hat(y)(t|t-1) = (C(z)-A(z)) / C(z) y(t) + B(z) / C(z) u(t-d) $
 
-We can compute the prediction error: 
+We can compute the prediction error:
 $
-  epsilon(t|t-1, theta) = A(z)/C(z) y(t) - B(z)/C(z)u(t-d)
+  epsilon(t|t-1, theta) = A(z) / C(z) y(t) - B(z) / C(z)u(t-d)
 $
 
-#note-box()[We cannot apply OLS since $hat(theta)$ appears in the denominator of the prediction appears in C(z), so in the denominator. 
-We cannot write $hat(y)(t|t-1, theta)$ as a linear function $phi(t)^T theta$. 
-We have to use non linear function of $theta$ so to optimize the prediction error we're going to use an *heuristic / iterative numerical appproach*]
+#note-box()[We cannot apply OLS since $hat(theta)$ appears in the denominator of the prediction appears in C(z), so in the denominator.
+  We cannot write $hat(y)(t|t-1, theta)$ as a linear function $phi(t)^T theta$.
+  We have to use non linear function of $theta$ so to optimize the prediction error we're going to use an *heuristic / iterative numerical appproach*]
 
 #note-box()[
-Iterative algorithms are guaranteed to converge to local minimima not global minima.
+  Iterative algorithms are guaranteed to converge to local minimima not global minima.
 ]
 
 To update our parameters, there are various strategies. We could use *Newtons method* and find the tangent paraboloid around the current iteration of the estimate of , our parameter $Theta^((i))$, then take the minimum of the computed paraboloid as the new estimate of $J_N (theta)$
 
 //TODO maybe add figure of parabolic gradient descent
 
-$ nu (Theta) = J_N (Theta^((i))) + pdv(J_N (Theta), Theta)_(Theta = Theta^((i))) (Theta - Theta^((i))) + 1/2 (Theta - Theta^((i)))^T pdv(J_N (Theta), Theta, 2)_(Theta = Theta^((i))) (Theta - Theta^((i))) $
+$
+  nu (Theta) = J_N (Theta^((i))) + pdv(J_N (Theta), Theta)_(Theta = Theta^((i))) (Theta - Theta^((i))) + 1 / 2 (Theta - Theta^((i)))^T pdv(J_N (Theta), Theta, 2)_(Theta = Theta^((i))) (Theta - Theta^((i)))
+$
 
 //TODO add the computation notes if we care
 
-=== Results 
-After computing the expressions of the Gradient and Hessian matrix, we can choose to update our parameters $theta^((i))$ always in the direction of the gradient, since it's going to give us the direction toward a stationary point of our loss function, and use the hessian matrix convex, hopefully or approximated definite positive to go towards a minima. 
+=== Results
+After computing the expressions of the Gradient and Hessian matrix, we can choose to update our parameters $theta^((i))$ always in the direction of the gradient, since it's going to give us the direction toward a stationary point of our loss function, and use the hessian matrix convex, hopefully or approximated definite positive to go towards a minima.
 
-We can choose different strategies to change the magnitude of our jump: 
+We can choose different strategies to change the magnitude of our jump:
 - *Newton's rule*: to have the learning rate of the algorithm according to the curvature of the paraboloid.
-$ theta^((i+1)) = theta^((i)) - ["hessian"]^(-1) dot "gradient" $ 
+$ theta^((i+1)) = theta^((i)) - ["hessian"]^(-1) dot "gradient" $
 - *Quasi-Newton*: to have the learning rate of the algorithm according to the curvature of the paraboloid.
- $ theta^((i+1)) = theta^((i)) - ["positive terms of the hessian"]^(-1) dot "gradient" $ 
+  $ theta^((i+1)) = theta^((i)) - ["positive terms of the hessian"]^(-1) dot "gradient" $
 - *Gradient descent*: to have a scalar and fixed learning rate. Fastest and simplest method.
 $ theta^((i+1)) = theta^((i)) - eta ["gradient"] $
 

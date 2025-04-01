@@ -310,10 +310,10 @@
   ]
 ]
 
-#remark( title: "Remark: Predictors in practice" )[
+#remark(title: "Remark: Predictors in practice")[
   How can we use the predictor from data in practice?
-  Since our Stochastic process is stationary, we have that: 
-    $ hat(y)(t+k|t) = F(z) / C(z) y(t) arrow.r.double.long  hat(y)(t|t-k) = F(z) / C(z) y(t-k) $ 
+  Since our Stochastic process is stationary, we have that:
+  $ hat(y)(t+k|t) = F(z) / C(z) y(t) arrow.r.double.long hat(y)(t|t-k) = F(z) / C(z) y(t-k) $
   This means we can get a predicition for the next possible value of our time-series. and we can compute it with data that we have, $y(t-k)$.
 ]
 
