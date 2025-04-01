@@ -17,7 +17,7 @@
   authors: (
     "Dario Crosa",
     "Francesco Genovese",
-    "Matteo Garzone"
+    "Matteo Garzone",
   ),
 )
 
@@ -34,3 +34,4 @@
 #include "chapters/06 - prediction.typ"
 #include "chapters/07 - model identification.typ"
 #include "chapters/08 - model validation.typ"
+#include "chapters/09 - non parametric identification.typ"
