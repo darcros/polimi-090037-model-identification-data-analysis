@@ -112,10 +112,10 @@
 
 #properties(title: "zeros and poles of MA model's transfer function")[
   All $MA(n)$ processes have
-  - $n$ zeros, all lying at the origin
-  - $n$ non-trivial poles
+  - $n$ non-trivial zeros
+  - $n$ poles, all lying at the origin
 
-  For this reason $MA(m)$ processes are called "all-poles" processes.
+  For this reason $AR(n)$ processes are called "all-zeros" processes.
 ]
 
 === Moving averages of order $infinity$
@@ -172,10 +172,10 @@ With the objective of modelling every kind of stochastic process, including thos
 
 #properties(title: "zeros and poles of AR model's transfer function")[
   All $AR(m)$ processes have
-  - $m$ non-trivial zeros
-  - $m$ poles, all lying at the origin
+  - $m$ zeros, all lying at the origin
+  - $m$ non-trivial poles
 
-  For this reason $AR(m)$ processes are called "all-zeros" processes.
+  For this reason $AR(m)$ processes are called "all-poles" processes.
 
   // TODO: is there a way to quickly find the zeros from the coefficients of y(t) ~ AR(m) ?
 ]
@@ -421,8 +421,8 @@ When calculating the covariance function of a process, it's often useful to defi
 
 #definition(title: "Unbiased model")[
   Let $y(t) ~ ARMA(m, n)$, $e(t) ~ WN(m_e, lambda^2)$
-  
-  $ tilde(e)(t) = e(t) - m_e$
+
+  $tilde(e)(t) = e(t) - m_e$
 
   $tilde(y)(t) = y(t) - m_y$ is the unbiased version of the process
 ]
@@ -432,35 +432,34 @@ We can prove that the covariance function of the unbiased version of a process i
 #theorem(title: "Covariance function of unbiased model")[
   $EE[e(t)e(t- tau)] = 0$ if $EE[e(t)] = 0$
 
-  $EE[ underbrace((e(t) - m_e), tilde(e)(t)) underbrace(e(t- tau) - EE[e(t-tau)], tilde(e)(t- tau))]  = 0 forall tau != 0$ 
+  $EE[ underbrace((e(t) - m_e), tilde(e)(t)) underbrace(e(t- tau) - EE[e(t-tau)], tilde(e)(t- tau))] = 0 forall tau != 0$
 
   Therefore
 
   $gamma_y (tau) &= EE[y(t) - m_y)(y(t-tau) - E[y(t-tau))] \
-  &=  EE[tilde(y)(t) tilde(y)(t-tau)] \ &= gamma_tilde(y)(tau)$
+    &= EE[tilde(y)(t) tilde(y)(t-tau)] \ &= gamma_tilde(y)(tau)$
 ]
 
 #theorem(title: "of the gain")[
 
-Using the unbiased version of the process we can get an equivalent representation
-#{
+  Using the unbiased version of the process we can get an equivalent representation
+  #{
     import fletcher: diagram, node, edge
     figure(
       diagram(
         node-shape: "rect",
         node-stroke: 1pt,
         edge((0, 0), "r", "-|>")[$tilde(e)(t)$],
-        edge((1,1), "u", "-|>")[$m_e$],
+        edge((1, 1), "u", "-|>")[$m_e$],
         edge((1, 0), "r", "-|>")[$e(t)$],
 
         node((2, 0))[$G(z)$],
         edge((2, 0), "rr", "-|>")[$y(t)$],
         node((1, 0), shape: "circle", inset: 2pt, sym.plus.minus),
-
       ),
     )
   }
-#{
+  #{
     import fletcher: diagram, node, edge
     figure(
       diagram(
@@ -470,22 +469,20 @@ Using the unbiased version of the process we can get an equivalent representatio
 
         node((2, 0))[$G(z)$],
         edge((2, 0), "rrr", "-|>")[$tilde(y)(t)$],
-        edge((0,1), "rr", "-|>")[$u= m_e$],
+        edge((0, 1), "rr", "-|>")[$u= m_e$],
         edge((2, 1), "rrr", "-")[$U = m_y = EE[y(t)]$],
         edge((5, 1), "u", "-|>"),
 
         node((2, 1))[$G(z)$],
 
         node((5, 0), shape: "circle", inset: 2pt, sym.plus.minus),
-                edge((5, 0), "r", "-|>")[$y(t)$],
-
-
+        edge((5, 0), "r", "-|>")[$y(t)$],
       ),
     )
   }
 
   We can use this to compute the expected value of our stochastic process
-  
+
   At *steady state* we have that
 
   $EE[y(t)] = lim_(t->1) = G(z) dot m_e = G(1) dot U$
