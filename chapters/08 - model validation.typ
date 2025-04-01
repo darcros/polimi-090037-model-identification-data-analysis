@@ -45,9 +45,65 @@ $"while" n<= n_max$
 
 #h(0.7cm) $J_N^((n))(theta) = 1/N sum_(i=1)^N (y(i) - M_theta^((n))(u(i)))^2 $
 
-//todo insert graphing of J_N(theta) in function of model order n_theta, delimiting underfitting from oveerfitting
 
-#note-box[We see that our loss function J_N(theta) is inversely proportional to the number of parameters in the model. The more parameters we have, the better we can fit the data. But this is not always a good thing since we may be fitting the noise of the data too. To avoid *overfitting*, we need to find a balance between the number of parameters and the goodness of fit.]
+#figure(
+)[
+ 
+
+  #cetz.canvas({
+    import suiji: gen-rng
+      import cetz.draw: *
+      import cetz-plot: *
+      import "../util.typ": random-series
+ 
+      let n_max =20
+      let actual_model_oder=10
+
+      let points = range(0,n_max).map(
+        x => (x+3, 20/(1+x) +1 )
+      ) 
+
+      plot.plot(
+        size: (5,5),
+        axis-style: "school-book",
+        x-label: [$n$ model order],
+        x-max: n_max,
+        y-max: n_max,
+        x-tick-step: 50,
+        y-tick-step: 50,
+        y-label: [$J_N (theta)$],
+             x-ticks: ((actual_model_oder, [$n_theta$]), 0),
+        {
+          plot.add(
+            points, line: "spline"
+          )
+
+          plot.add-vline(actual_model_oder, style: (stroke:(dash:"dashed")))
+            plot.add-fill-between(
+            range(0, actual_model_oder+1).map(x => (x, 0)),
+            range(0, actual_model_oder+1).map(x => (x, 20)),
+            style: (fill: rgb("#ff00006c"), stroke: none), 
+            label: ["underfitting"] // Highlight underfitting in red
+            )
+            plot.add-fill-between(
+            range(actual_model_oder, actual_model_oder+11).map(x => (x, 0)),
+            range(actual_model_oder, actual_model_oder+11).map(x => (x, 20)),
+                        style: (fill: rgb("#0000ff46"), stroke: none),
+            label: ["overfitting"]
+            )
+
+        }
+
+      )
+      
+
+
+  }
+    
+  )
+]
+
+#note-box[We see that our loss function $J_N  (theta)$ is inversely proportional to the number of parameters in the model. The more parameters we have, the better we can fit the data. But this is not always a good thing since we may be fitting the noise of the data too. To avoid *overfitting*, we need to find a balance between the number of parameters and the goodness of fit.]
 
 
 Three criteria for model order selections are
@@ -68,9 +124,74 @@ This is not adequeate for time series data since the data is not independent and
 ==== Cross validation with model order penalties
 Instead of minimizing J_N(theta), we can minimize a penalized version of it:
 
+#figure(
+)[
+ 
+
+  #cetz.canvas({
+    import suiji: gen-rng
+      import cetz.draw: *
+      import cetz-plot: *
+      import "../util.typ": random-series
+ 
+      let n_max =20
+      let actual_model_oder=10
+
+      let points = range(0,n_max).map(
+        x => (x+3, 20/(1+x) +1 )
+      ) 
+
+      let AIC_points = range(0,n_max).map(
+        x => (x+3, calc.ln((50/(1+x) +10 ) + 2*x/(n_max))
+      ))
+      let FPE_points = range(0,n_max).map(
+        x => (x+3, 20/(1+x) +1 + (n_max+x)/(n_max - x))
+      )
+      let MDL_points = range(0,n_max).map(
+        x => (x+3, calc.ln(100/(1+x) +10) +x*calc.ln(x+1)/(2*n_max))
+      )
+
+      plot.plot(
+        size: (5,5),
+        axis-style: "school-book",
+        x-label: [$n$ model order],
+        x-max: n_max,
+        y-max: n_max,
+        x-tick-step: 50,
+        y-tick-step: 50,
+        y-label: [$J_N (theta)$],
+             x-ticks: ((actual_model_oder, [$n_theta$]), 0),
+        {
+          plot.add(
+            points, line: "spline", label: ["J_N(theta)"]
+          )
+
+          plot.add-vline(actual_model_oder, style: (stroke:(dash:"dashed")))
+          plot.add(
+            AIC_points, line: "spline",  label: ["AIC"]
+          )
+          plot.add(
+            FPE_points, line: "spline",  label: ["FPE"]
+          )
+          plot.add(
+            MDL_points, line: "spline",  label: ["MDL"]
+          )
+          
+
+        }
+
+      )
+      
+  }
+    
+  )
+]
 
 + *FPE*: Final Prediction Error $"FPE" = (N+ n)/(N-n) J_N(theta)$
 + *AIC*: Akaike Information Criterion $"AC"(n) = ln(J_N(theta)) + 2n/(N)$
 + *MDL*: Minimum Description Length $"MDL"(n) = ln(J_N(theta)) + n ln(N)/(2N)$
 
-
+#note-box[
+  If $cal(S) in cal(M)_theta$, and $cal(M)_theta$ is in the set of *ARX* model, MDL is right.
+  If $cal(S) in cal(M)_theta$, and $cal(M)_theta$ is in the set of *ARMAX* model we prefer slightly to overfit so we tend to use AIC.
+]
