@@ -349,14 +349,17 @@ $
 
 Let's call $F(z)z^(-k) := C(z)- A(z)$ the rest of our long division.
 Our predictor is therefore:
-$ hat(y)(t|t-1) = (C(z)-A(z)) / C(z) y(t) + B(z) / C(z) u(t-d) $
+$ hat(y)(t|t-1) = (C(z)-A(z)) / C(z) y(t) +( B(z) E(z)) / C(z) u(t-d) $
 
-We can compute the prediction error:
+The stationarity of the process gives us that, for a generic k
+$ hat(y)(t + k |t) = (C(z)-A(z)) / C(z) y(t + k) +( B(z) E(z)) / C(z) u(t+k-d) $
+
+Returning to $k=1$, we can compute the prediction error:
 $
   epsilon(t|t-1, theta) = A(z) / C(z) y(t) - B(z) / C(z)u(t-d)
 $
 
-#note-box()[We cannot apply OLS since $hat(theta)$ appears in the denominator of the prediction appears in C(z), so in the denominator.
+#note-box()[We cannot apply OLS since $hat(theta)$ appears in the denominator of the prediction appears in C(z).
   We cannot write $hat(y)(t|t-1, theta)$ as a linear function $phi(t)^T theta$.
   We have to use non linear function of $theta$ so to optimize the prediction error we're going to use an *heuristic / iterative numerical appproach*]
 
