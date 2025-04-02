@@ -9,12 +9,12 @@ Let's suppose we only need a set of statistics reguarding the system. Computing 
 
 Let's first define some properties of the estimators we are going to use.
 #definition(title: "Correctness")[
-  $hat(T)_N$ is a correct estimator of $T^*$ if the expectation of the estimator is equal to the true value of the parameter, i.e. $ EE[hat(T)_N] = T^* $
-  Asymptotic correctness is defined as $ EE[hat(T)_N] -->_(N -> infinity) T^* $
+  $hat(T)_N$ is a *correct estimator* of $T^*$ if the expectation of the estimator is equal to the true value of the parameter, i.e. $ EE[hat(T)_N] = T^* $
+  *Asymptotic correctness* is defined as $ EE[hat(T)_N] -->_(N -> infinity) T^* $
 ]
 
 #definition(title: "Consistency")[
-  $hat(T)_N$ is a consistent estimator of $T^*$ if the variance of the estimator goes to zero as the number of samples goes to infinity, i.e. $ "VAR"[hat(T)_N] = EE[(hat(T)_N - T^*)^2] -->_(N -> infinity) 0 $.
+  $hat(T)_N$ is a *consistent estimator* of $T^*$ if the variance of the estimator goes to zero as the number of samples goes to infinity, i.e. $ "VAR"[hat(T)_N] = EE[(hat(T)_N - T^*)^2] -->_(N -> infinity) 0 $.
 ]
 
 Some of the most common non parametric estimators are:
