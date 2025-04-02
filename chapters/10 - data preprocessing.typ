@@ -88,7 +88,7 @@ $ y(t +1 | t) = hat(m) + hat(k) t + hat(tilde(y))(t +1 | t) $.
     })
 
     plot.plot(
-      size: (10, 6),
+      size: (10, 5),
       axis-style: "school-book",
       x-label: [$t$],
       y-label: [$v(t, overline(s))$],
@@ -167,7 +167,7 @@ The way to remove seasonality, and therefore periodic signals from the data, is 
     })
 
     plot.plot(
-      size: (12, 6),
+      size: (12, 5),
       axis-style: "school-book",
       x-tick-step: 0.1,
       x-ticks: (0.1,),
@@ -183,3 +183,13 @@ The way to remove seasonality, and therefore periodic signals from the data, is 
     )
   }),
 )
+
+
+In order to estimate $hat(y)(t+k|t)$, we estimate $hat(s)(t)$, remove it, compute $hat(tilde(y))(t+k|t)$ and add $hat(s)(t)$ back.
+
+$
+  hat(s)(t) &= 1 / M sum_(h=0)^(M-1) y(t+ h t) \
+  &= underbrace(1 / M sum_(h=0)^(M-1) (y)(t+ h t), EE[tilde(y)(t) = 0 ] \ "if there is a " \ " trend we can" \ " remove it") + underbrace(1 / M sum_(h=0)^(M-1) s(t+ h t), EE[dot] = s(t)) \\
+$
+
+where $M$ is the number of periods in the dataset, T their length. Remember $M < N T$
