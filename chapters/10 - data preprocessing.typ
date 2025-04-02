@@ -59,6 +59,12 @@ $ y(t +1 | t) = hat(m) + hat(k) t + hat(tilde(y))(t +1 | t) $.
 
 
 == Seasonality removal
+
+#let trend-period = 10 * 2 * calc.pi
+#let trend-amplitude = 10
+#let trend-omega = (2 * calc.pi) / trend-period
+#let trend(x) = trend-amplitude * calc.cos(trend-omega * x)
+
 #figure(
   cetz.canvas({
     import suiji: gen-rng
@@ -68,10 +74,8 @@ $ y(t +1 | t) = hat(m) + hat(k) t + hat(tilde(y))(t +1 | t) $.
 
     let samples = 100
 
-    let trend(x) = 20 * calc.sin(0.1 * x) + 10 * calc.sin(0.2 * x) + 5 * calc.sin(0.4 * x)
-
     let rng = gen-rng(2)
-    let (rng, ssp-realization) = random-series(rng, samples, from: 0, to: samples, min: -5, max: 5)
+    let (rng, ssp-realization) = random-series(rng, samples, from: 0, to: samples)
 
     let trend-realization = ssp-realization.map(v => {
       let (t, value) = v
@@ -86,27 +90,36 @@ $ y(t +1 | t) = hat(m) + hat(k) t + hat(tilde(y))(t +1 | t) $.
     plot.plot(
       size: (10, 6),
       axis-style: "school-book",
-      y-max: +30,
-      // x-tick-step: none,
       x-label: [$t$],
-      y-tick-step: none,
       y-label: [$v(t, overline(s))$],
       {
         plot.add(
           label: [SSP realization $tilde(y)(t)$],
           ssp-realization,
-          // line: "spline",
         )
         plot.add(
-          label: [seasonal trend $k sin(t)$],
+          label: [seasonal trend $k cos(omega t)$],
           trend-realization,
-          // line: "spline",
         )
         plot.add(
           label: [trended realization $y(t)$],
           trended-realization,
-          // line: "spline",
         )
+        plot.annotate({
+          line(
+            (trend-period * 0.5, -1.1 * trend-amplitude),
+            (trend-period * 0.5 + trend-period, -1.1 * trend-amplitude),
+            mark: (start: "|", end: "|", width: 0.75),
+            name: "line",
+          )
+          content(
+            ("line.start", 50%, "line.end"),
+            angle: "line.end",
+            padding: 1,
+            anchor: "south",
+            $T_"trend" = 20 pi -> omega_"trend" = 0.1$,
+          )
+        })
       },
     )
   }),
@@ -124,8 +137,6 @@ The way to remove seasonality, and therefore periodic signals from the data, is 
     import "../util.typ": random-series
 
     let samples = 500
-
-    let trend(x) = 20 * calc.sin(0.1 * x) + 10 * calc.sin(0.2 * x) + 5 * calc.sin(0.4 * x)
 
     let rng = gen-rng(2)
     let (rng, ssp-realization) = random-series(rng, samples, from: 0, to: samples, min: -5, max: 5)
@@ -148,26 +159,27 @@ The way to remove seasonality, and therefore periodic signals from the data, is 
     }
 
     let dft-samples = 1000
-    let omega-min = 0
-    let omega-max = +0.5
-    let step = (omega-max - omega-min) / dft-samples
+    let omega-cut = 0.35
+    let step = (2 * omega-cut) / dft-samples
     let dft-samples = range(0, dft-samples).map(i => {
-      let omega = i * step + omega-min
+      let omega = i * step - omega-cut
       return (omega, dft(omega))
     })
 
     plot.plot(
       size: (12, 6),
       axis-style: "school-book",
-      x-format: plot.formats.multiple-of,
-      x-label: [Frequency],
+      x-tick-step: 0.1,
+      x-ticks: (0.1,),
+      x-min: -omega-cut,
+      x-max: omega-cut,
+      x-label: $omega$,
       y-min: 0,
       y-label: [Magnitude],
       {
         plot.add(label: [DFT Magnitude], dft-samples)
-        plot.add-vline(0.1, 0.2, 0.4)
+        plot.add-vline(label: $omega_"trend"$, trend-omega)
       },
     )
   }),
 )
-  
