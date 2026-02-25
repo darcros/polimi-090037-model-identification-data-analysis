@@ -9,8 +9,7 @@ Stochastic processes extend the notion of random variable to signals.
 
   $ v(1, s), v(2, s), dots, v(t, s) $
 
-  where $t$ is the time index.
-  // FIXME: is $s$ the probabilisti space or something else?
+  where $t$ is the time index and $s in S$ denotes the outcome in the sample space $S$.
 ]
 
 #figure(
@@ -105,7 +104,7 @@ For this reason we use the wide-sense characterization, which means that we desc
     import suiji: gen-rng
     import cetz.draw: *
     import cetz-plot: *
-    import "../util.typ": random-series, avg-series
+    import "../util.typ": avg-series, random-series
     let rng = gen-rng(1)
 
     let realizations = ()
@@ -148,27 +147,142 @@ For this reason we use the wide-sense characterization, which means that we desc
   The #underline[variance function] $gamma(t) = gamma(t_1, t_2)|_(t_1 = t_2) = EE[(v(t)-m(t))^2]$ is a particular case of the covariance function, it measures the distance from the mean.
 ]
 
-// TODO: graphical representation of the covariance function and how it relates to the realizations (slow vs. nervous realization)
+#remark[
+  Intuitively, when $gamma(tau)$ decays *slowly*, realizations appear *smooth* (slowly varying). When $gamma(tau)$ decays *quickly* (small for $tau >= 1$), realizations appear *nervous* (rapidly fluctuating), approaching white noise behavior.
+]
+
+#figure(
+  grid(
+    columns: 2,
+    gutter: 1em,
+    cetz.canvas({
+      import suiji: gen-rng
+      import cetz.draw: *
+      import cetz-plot: *
+
+      // Slow decay: AR(1) with a close to 1 → smooth realization
+      let rng = gen-rng(42)
+      let a = 0.95
+      let n = 60
+      let points = ()
+      let y = 0.0
+      for i in range(n) {
+        let (r, e) = suiji.uniform(rng, low: -0.3, high: 0.3)
+        rng = r
+        y = a * y + e
+        points.push((i, y))
+      }
+
+      plot.plot(
+        size: (6, 2.5),
+        axis-style: "school-book",
+        x-tick-step: none,
+        x-label: [$t$],
+        y-tick-step: none,
+        y-label: [$y(t)$],
+        {
+          plot.add(points, line: "linear", style: (stroke: blue))
+        },
+      )
+      content((3, -2), [Slow decay ($a = 0.95$): smooth])
+    }),
+    cetz.canvas({
+      import suiji: gen-rng
+      import cetz.draw: *
+      import cetz-plot: *
+
+      // Fast decay: AR(1) with a close to 0 → nervous realization
+      let rng = gen-rng(42)
+      let a = 0.1
+      let n = 60
+      let points = ()
+      let y = 0.0
+      for i in range(n) {
+        let (r, e) = suiji.uniform(rng, low: -1.0, high: 1.0)
+        rng = r
+        y = a * y + e
+        points.push((i, y))
+      }
+
+      plot.plot(
+        size: (6, 2.5),
+        axis-style: "school-book",
+        x-tick-step: none,
+        x-label: [$t$],
+        y-tick-step: none,
+        y-label: [$y(t)$],
+        {
+          plot.add(points, line: "linear", style: (stroke: red))
+        },
+      )
+      content((3, -2), [Fast decay ($a = 0.1$): nervous])
+    }),
+  ),
+  caption: [Effect of covariance decay rate on realization appearance. Left: $gamma(tau)$ decays slowly (high autocorrelation) producing smooth trajectories. Right: $gamma(tau)$ decays quickly producing nervous, rapidly fluctuating trajectories.],
+)
 
 #definition(title: "Correlation function")[
-  // FIXME: I don't know which simbol to use so i called it "corr"
-  $"corr"(t_1, t_2) = EE[v(t_1) v(t_2)]$
+  $tilde(gamma)(t_1, t_2) = EE[v(t_1) v(t_2)]$
 ]
 
 #caution-box[
   The correlation function is similar but *NOT THE SAME* as the covariance function.
 
+  They are related by:
+  $ gamma(t_1, t_2) = tilde(gamma)(t_1, t_2) - mu(t_1) mu(t_2) $
+
   They coincide iff the mean value of the SP is 0
-  $ gamma_v(t_1, t_2) eq.triple "corr"_v(t_1, t_2) <==> m_v = 0 $
+  $ gamma_v(t_1, t_2) eq.triple tilde(gamma)_v(t_1, t_2) <==> m_v = 0 $
+
+  For stationary processes: $tilde(gamma)(tau) = gamma(tau) + mu^2$
+]
+
+#definition(title: "Cross-covariance function")[
+  The cross-covariance relates two different processes:
+  $ gamma_(12)(t_1, t_2) = EE[(v_1(t_1) - mu_1(t_1))(v_2(t_2) - mu_2(t_2))] $
+]
+
+#definition(title: "Normalized covariance (Pearson correlation coefficient)")[
+  $ rho(t_1, t_2) = gamma(t_1, t_2) / sqrt(gamma(t_1, t_1) dot gamma(t_2, t_2)) $
+
+  Properties:
+  - $rho(t, t) = 1$
+  - $|rho(t_1, t_2)| <= 1$
+  - $|rho| = 1$: maximal correlation
+  - $rho = 0$: incorrelation
+]
+
+#theorem(title: "Cauchy-Schwarz inequality for covariance")[
+  $ |"Cov"[v(t_1), v(t_2)]| <= sqrt("Var"[v(t_1)] dot "Var"[v(t_2)]) $
+]
+
+#proof[
+  Consider the random vector $bold(v) = vec(v(t_1), v(t_2))$.
+  Its variance matrix is:
+  $ "Var"[bold(v)] = mat("Var"[v(t_1)], "Cov"[v(t_1), v(t_2)]; "Cov"[v(t_1), v(t_2)], "Var"[v(t_2)]) gt.eq 0 $
+
+  Since this matrix is positive semidefinite, its determinant is non-negative:
+  $ "Var"[v(t_1)] dot "Var"[v(t_2)] - "Cov"[v(t_1), v(t_2)]^2 >= 0 $
 ]
 
 == Stationary Stochastic Processes
 
-#definition(title: "Stationary stochastic process")[
+#definition(title: "Strongly stationary process")[
+  A process is strongly stationary if, for any $n$ instants $t_1, dots, t_n$ and any time shift $T$:
+  $ F_(t_1, t_2, dots, t_n)(q_1, dots, q_n) = F_(t_1+T, t_2+T, dots, t_n+T)(q_1, dots, q_n) quad forall T $
+
+  This is a complete but extremely complex characterization.
+]
+
+#definition(title: "Weakly stationary stochastic process (SSP)")[
   A SP with
   - $m(t) = m quad forall t$
   - $gamma(t_1, t_2) = gamma(t_1, t_1 + tau) = gamma(tau)$
   Both the expected value and the covariance function do not depend on the specific instant, the covariance function depends on the distance of two instants we call *$tau$* or *lag*.
+]
+
+#remark[
+  If a process is strongly stationary and its expected value and covariance function exist, then it is also weakly stationary.
 ]
 
 #example(title: "Non stationary stochastic processes")[
@@ -184,11 +298,76 @@ For this reason we use the wide-sense characterization, which means that we desc
 #properties(title: "Covariance of SSPs")[
   / positive: $gamma(0) = E[(v(t,s) - m)^2] >= 0$
   / non-increasing: $|gamma(tau)| <= gamma(0) quad forall tau$
-  // FIXME: lo ho anche io così negli appunti ma non dovrebbe essere per t e t + tau?
   / even function: $gamma(tau) = gamma(-tau) quad forall tau$
 ]
 
+#proof(title: "Proof that γ(τ) = γ(−τ)")[
+  $gamma(tau) = EE[(v(t)-mu)(v(t+tau)-mu)] = EE[(v(t+tau)-mu)(v(t)-mu)] = gamma(-tau)$
+]
 
+#properties(title: "Toeplitz matrix property")[
+  The covariance matrix built from $gamma(tau)$ is positive semidefinite:
+  $
+    mat(gamma(0), gamma(1), dots, gamma(N-1); gamma(1), gamma(0), dots, gamma(N-2); dots.v, , dots.down, dots.v; gamma(N-1), dots, , gamma(0)) gt.eq 0
+  $
+
+  This can be verified by observing that it equals $EE[bold(V) bold(V)^TT]$ where $bold(V) = vec(v(0)-mu, v(1)-mu, dots.v, v(N-1)-mu)$.
+
+  An even function $gamma(tau)$ is a valid covariance function iff the associated Toeplitz matrix is positive semidefinite for all $N$.
+]
+
+=== Gaussian processes
+
+#definition(title: "Gaussian process")[
+  A process is Gaussian if, for any $n$ instants $t_1, dots, t_n$, the random variables $v(t_1), dots, v(t_n)$ are jointly Gaussian.
+]
+
+#theorem[
+  Weakly stationary + Gaussian $arrow.r.double$ Strongly stationary.
+]
+
+=== Ergodic processes
+
+#definition(title: "Ergodic process")[
+  A stationary process is *ergodic* if statistical properties can be derived (with probability 1) from a single realization.
+  $ lim_(N -> infinity) 1 / N sum_(i=1)^N (dot) --> EE[dot] $
+
+  For ergodic processes, time averages converge to ensemble averages.
+]
+
+
+
+=== White Noise
+
+#definition(title: "White Noise (WN)")[\
+  A stationary stochastic process $e(t)$ is called *white noise* with variance $lambda^2$ if:
+  - $EE[e(t)] = 0 quad forall t$
+  - $gamma_e (tau) = cases(lambda^2 &"if" tau = 0, 0 &"if" tau != 0)$
+
+  We denote this as $e(t) tilde WN(0, lambda^2)$.
+]
+
+#remark[
+  White noise is *completely unpredictable*: knowing the past of $e(t)$ provides no information about future values. This makes it the fundamental building block for stochastic process models.
+]
+
+=== Wold's Decomposition
+
+#theorem(title: "Wold's decomposition theorem")[
+  Any stationary process $v(t)$ can be uniquely decomposed as the sum of two uncorrelated components:
+  $ v(t) = w(t) + d(t) $
+  where:
+  - $w(t)$ is a *purely non-deterministic* (PND) component, representable as:
+    $ w(t) = sum_(k=0)^(infinity) c_k e(t-k) quad e(t) tilde WN(0, lambda^2) $ with $c_0 = 1$ and $sum_(k=0)^infinity c_k^2 < infinity$
+  - $d(t)$ is a *purely deterministic* component that can be perfectly predicted from its past
+  - $gamma_(w d)(tau) = 0 quad forall tau$ (the two components are uncorrelated)
+]
+
+#remark[
+  - The PND component has a representation as an $MA(infinity)$ driven by white noise
+  - For most practical applications, the deterministic component is absent ($d(t) = 0$), and $v(t)$ is purely non-deterministic
+  - A sinusoidal process $v(t) = A sin(omega_0 t + phi)$ with $phi$ random is an example of a purely deterministic stationary process
+]
 
 === Operatorial representation
 
@@ -226,7 +405,7 @@ Most notably:
   All the properties of generic transfer functions apply:
   - *Series* of filters: $y(t) = M(z)W(z)u(t)$
     #{
-      import fletcher: diagram, node, edge
+      import fletcher: diagram, edge, node
       figure(
         diagram(
           node-shape: "rect",
@@ -240,9 +419,9 @@ Most notably:
       )
     }
 
-  - *Parallel* of filters: $y(t) = M(z)u(t) plus.minus W(z)u(t) $
+  - *Parallel* of filters: $y(t) = M(z)u(t) plus.minus W(z)u(t)$
   #{
-    import fletcher: diagram, node, edge
+    import fletcher: diagram, edge, node
     figure(
       diagram(
         node-shape: "rect",
@@ -265,7 +444,7 @@ Most notably:
   - Filters in *Feedback configurations*:
     $y(t) = M(z) / (1 minus.plus W(z)M(z)) u(t)$
     #{
-      import fletcher: diagram, node, edge
+      import fletcher: diagram, edge, node
       figure(
         diagram(
           node-shape: "rect",
@@ -284,7 +463,7 @@ Most notably:
 ]
 
 
-=== Stationarity theorem // FIXME: I don't know what it's actually called
+=== Stability and stationarity of digital filters
 
 #note-box[
   This stuff is explained later in the lectures.
@@ -300,8 +479,7 @@ Most notably:
   / singularity: a pole or a zero
 ]
 
-// TODO: what was the name of the theorem?
-#theorem(title: "Asymptotic stability for linear digital filters")[
+#theorem(title: "Asymptotic stability of digital filters")[
   A linear digital filter with transfer function $W(z)$ is asymptotically stable iff
   all of its poles are strictly inside the unit circle (in the complex plane).
 
@@ -349,10 +527,9 @@ Most notably:
   )
 ]
 
-// TODO: what was the name of the theorem?
-#theorem(title: "Stationarity for steady state outputs of digital filters")[
+#theorem(title: "Stationarity of steady-state output")[
   #{
-    import fletcher: diagram, node, edge
+    import fletcher: diagram, edge, node
     figure(
       diagram(
         node-shape: "rect",
@@ -364,8 +541,7 @@ Most notably:
     )
   }
 
-  // TODO: define steady-state
-  The steady-state output $y(t)$ is stationary iff
+  The *steady-state* output (i.e. the output after all initial-condition transients have decayed) $y(t)$ is stationary iff
   - $e(t)$ is SSP
   - $W(z)$ is asymptotically stable
 ] <thm:stationarity>

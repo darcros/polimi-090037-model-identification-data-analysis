@@ -2,6 +2,29 @@
 
 
 = Data preprocessing
+
+== Experiment design
+
+#remark(title: "Input signal design")[
+  The choice of input signal $u(t)$ is critical for identification:
+  - The input must be *persistently exciting* of sufficient order
+  - Common choices: white noise, PRBS, multisine, chirp
+  - The input should excite all relevant frequency bands of the system
+]
+
+#remark(title: "Sampling time selection")[
+  The sampling time $T_s$ should satisfy the Shannon-Nyquist theorem:
+  $ T_s <= pi / omega_("max") $
+  where $omega_("max")$ is the maximum frequency of interest.
+
+  Rules of thumb:
+  - $T_s approx T_("rise") / 10$ (rise time of the step response)
+  - Too fast: data is highly correlated, numerical issues
+  - Too slow: aliasing, loss of dynamic information
+]
+
+== Dealing with non-stationary data
+
 Let's now tackle non-stationary processes. An approach to this problem is preprocess the data to make extract the stationary part of the process. This is called *data preprocessing*.
 
 Two possible phenomena can be observed in the data that make it non-stationary are:
@@ -48,7 +71,7 @@ $ (hat(m), hat(k)) = argmin_{m,k} sum_{i=1}^N (y_i - (k t_i + m))^2 $.
 
 The OLS solution is given by the following vectorial equations:
 $
-  (hat(m), hat(k))^T = mat(sum^N(t^2), sum^N(t); sum^N(t), N)^{-1} dot mat(sum_((t=1))^N t y(t); sum_((t=1))^N y(t); )
+  (hat(m), hat(k))^T = mat(sum^N(t^2), sum^N(t); sum^N(t), N)^{-1} dot mat(sum_((t=1))^N t y(t); sum_((t=1))^N y(t);)
 $
 
 Then, the detrended data is given by:
@@ -193,3 +216,42 @@ $
 $
 
 where $M$ is the number of periods in the dataset, T their length. Remember $M < N T$
+
+== ARIMA and CARIMA models
+
+#definition(title: "ARIMA model")[
+  For non-stationary processes with stochastic trends, we can use the *differencing operator*:
+  $ Delta = 1 - z^(-1), quad Delta y(t) = y(t) - y(t-1) $
+
+  An *ARIMA(m, d, n)* model applies $d$ differences before fitting an ARMA:
+  $ A(z) Delta^d y(t) = C(z) e(t) $
+
+  The most common case is $d = 1$ (single differencing).
+]
+
+#definition(title: "CARIMA/ARIMAX model")[
+  Adding exogenous input to ARIMA:
+  $ A(z) Delta y(t) = B(z) u(t-d) + C(z)/Delta e(t) $
+
+  This model is useful when the non-stationarity is in the noise (integrated noise).
+]
+
+== Outlier handling
+
+#definition(title: "Outliers")[
+  Outliers are data points that deviate significantly from the expected behavior. Three common strategies:
+  + *Remove and interpolate*: Replace outliers with interpolated values from neighbors
+  + *Robust estimation*: Use robust loss functions (e.g., Huber loss) instead of squared error
+  + *Trim*: Simply discard segments containing outliers
+
+  Detection: points beyond $plus.minus 3 sigma$ from the mean, or using median absolute deviation (MAD).
+]
+
+== Unknown delay handling
+
+#remark(title: "Estimating the input-output delay")[
+  If the delay $d$ is unknown, it can be estimated by:
+  + Fitting ARX models with different values of $d$ and selecting the one with minimum FPE/AIC
+  + Examining the cross-correlation function $hat(gamma)_(u y)(tau)$ — the delay appears as the first significant lag
+  + Analyzing the impulse response estimate
+]

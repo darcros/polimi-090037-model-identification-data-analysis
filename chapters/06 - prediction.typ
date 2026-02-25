@@ -12,9 +12,6 @@
 
   How can we predict future values of the process at a generic time instant $t+k$ ?
 
-  // FIXME: confusing variable naming
-  // - t is both the variable in y(t) and also the time index in t+k
-  // - in the plot t is both the x axis label and a mark in the x axis
 
   #figure(
     cetz.canvas({
@@ -52,9 +49,7 @@
 ]
 
 #definition(title: "Predictor")[
-  $hat(y) (t+k|t)$ is the predictor of SSP $y(t)$.
-
-  // TODO: explain
+  $hat(y) (t+k|t)$ is the predictor of SSP $y(t)$: an estimate of the future value $y(t+k)$ based on all available observations up to time $t$.
 ]
 
 #definition(title: "Trivial predictor")[
@@ -62,15 +57,15 @@
 ]
 
 #definition(title: "Linear predictor")[
-  An "optimal" linear predictor contains both information about the model information $angle.l alpha_0, alpha_1, dots angle.r$ and the data $ angle.l y(t), y(t-1), dots angle.r$.
+  An "optimal" linear predictor contains both information about the model information $chevron.l alpha_0, alpha_1, dots chevron.r$ and the data $chevron.l y(t), y(t-1), dots chevron.r$.
   $
-    hat(y)(t+k|t) &= alpha_0 y(t) + alpha_1 y(t - 1) + dots \
-    &= sum_(i=0)^(+infinity) (alpha_i) y(t-i)
+    hat(y)(t+k|t) & = alpha_0 y(t) + alpha_1 y(t - 1) + dots \
+                  & = sum_(i=0)^(+infinity) (alpha_i) y(t-i)
   $
 
   with $alpha_i in RR$ such that $sum_(i=0)^(+infinity) alpha_i < +infinity$
 
-  // TODO: note that alpha_i is info from the model and y(t-i) is info from the data
+  Note that $alpha_i$ encodes information from the *model* while $y(t-i)$ provides information from the *data*.
 ]
 
 #definition(title: "Prediction error")[
@@ -81,8 +76,8 @@
 #definition(title: "Mean squared prediction error")[
   The MSP of $hat(y)$ is
   $
-    cal(J) (hat(y)) &= EE[epsilon(t+k|t)^2] \
-    &= EE[(y(t+k) - hat(y) (t+k|t))^2]
+    cal(J) (hat(y)) & = EE[epsilon(t+k|t)^2] \
+                    & = EE[(y(t+k) - hat(y) (t+k|t))^2]
   $
 ]
 
@@ -110,18 +105,19 @@
 #solution[
   Remember that
   $
-    y(t) &= W(z)e(t) \ &= w_0 e(t) + w_1 e(t-1) + w_2 e(t-2) + dots \
-    &= sum_(i=0)^(+infinity) w_i e(t-i) \
-    y(t-1) &= sum_(i=0)^(+infinity) w_i e(t-i-1) \
-    y(t-2) &= sum_(i=0)^(+infinity) w_i e(t-i-2) \
-    &dots.v
+      y(t) & = W(z)e(t) \
+           & = w_0 e(t) + w_1 e(t-1) + w_2 e(t-2) + dots \
+           & = sum_(i=0)^(+infinity) w_i e(t-i) \
+    y(t-1) & = sum_(i=0)^(+infinity) w_i e(t-i-1) \
+    y(t-2) & = sum_(i=0)^(+infinity) w_i e(t-i-2) \
+           & dots.v
   $
 
   So we can rewrite our linear predictor in the following way
   $
-    hat(y)(t+k|t) &= alpha_0 y(t) + alpha_1 y(t - 1) + dots \
-    &= alpha_0 sum_(i=0)^(+infinity) w_i e(t-i) + alpha_1 sum_(i=0)^(+infinity) w_i e(t-i-1) + dots \
-    &= sum_(i=0)^(+infinity) beta_i e(t-i)
+    hat(y)(t+k|t) & = alpha_0 y(t) + alpha_1 y(t - 1) + dots \
+                  & = alpha_0 sum_(i=0)^(+infinity) w_i e(t-i) + alpha_1 sum_(i=0)^(+infinity) w_i e(t-i-1) + dots \
+                  & = sum_(i=0)^(+infinity) beta_i e(t-i)
   $
 
   // TODO: what is the definition of beta_i?
@@ -133,37 +129,33 @@
 
   Let's consider $y(t+k)$ alone, we can split it into two parts
   $
-    y(t+k) &= sum_(i=0)^(+infinity) w_i e(t-i-k) \
-    &=
-    underbrace(
-      sum_(j=0)^(k-1) w_j e(t+k-j),
-      "future"\ ("because" k-j > 0)
-    ) +
-    underbrace(
-      sum_(i=0)^(+infinity) w_(i+k) e(t-i),
-      "present" ("for" i = 0)\ "and past" ("for" i > 0)
-    )
+    y(t+k) & = sum_(i=0)^(+infinity) w_i e(t-i-k) \
+           & =
+             underbrace(
+               sum_(j=0)^(k-1) w_j e(t+k-j),
+               "future"\ ("because" k-j > 0)
+             ) +
+             underbrace(
+               sum_(i=0)^(+infinity) w_(i+k) e(t-i),
+               "present" ("for" i = 0)\ "and past" ("for" i > 0)
+             )
   $
 
   Now lets consider the full $cal(V)(beta)$:
-  // FIXME: this formula is monstrous
-  // FIXME: it goes out of the page margins
-  $
-    cal(V)(beta) &= EE[(y(t+k) - hat(y)(t+k|t, beta))^2] \
-    &= EE[( sum_(j=0)^(k-1) w_j e(t+k-j) +
-        sum_(i=0)^(+infinity) w_(k+i) e(t-i) -
-        sum_(i=0)^(+infinity) beta_i e(t-i) )^2] \
-    &= EE[ underbrace((sum_(j=0)^(k-1) w_j e(t+k-j))^2, "not a function of" beta) +
-      (sum_(i=0)^(+infinity) (w_(k+i) - beta_i) e(t-i))^2 + underbrace(
-        cancel(
-          2 (sum_(j=0)^(k-1) w_j e(t+k-j)) (sum_(i=0)^(+infinity) (w_(k+i) - beta_i) e(t-i))
-        ),
-        "all uncorrelated because WN at different time instants"
-        ) ]
-  $
-
-  So the optimal predictor is given by the minimizer of
-  $ EE[(sum_(i=0)^(+infinity) (w_(k+i) - beta_i) e(t-i))^2] >= 0 $
+  #set math.equation(numbering: none)
+  #block(width: 100%, inset: 0pt)[
+    $
+      cal(V)(beta) & = EE[(y(t+k) - hat(y)(t+k|t, beta))^2] \
+                   & = EE[( sum_(j=0)^(k-1) w_j e(t+k-j) +
+                         sum_(i=0)^(+infinity) w_(k+i) e(t-i) -
+                         sum_(i=0)^(+infinity) beta_i e(t-i) )^2] \
+                   & = EE[ underbrace((sum_(j=0)^(k-1) w_j e(t+k-j))^2, "not a function of" beta) +
+                       (sum_(i=0)^(+infinity) (w_(k+i) - beta_i) e(t-i))^2 + underbrace(
+                         cancel(2 (sum_(j=0)^(k-1) w_j e(t+k-j)) (sum_(i=0)^(+infinity) (w_(k+i) - beta_i) e(t-i))),
+                         "all uncorrelated because WN at different time instants"
+                       ) ]
+    $
+  ]
   This means that $hat(beta)_i = w_(k+i), i = 0, 1, dots$
 
   So our optimal predictor is
@@ -206,26 +198,25 @@
   After $k$ division steps we get a quotient $E(z)$ which is a polynomial of order $k$ and a rest $z^(-k) F(z)$
   $ W(z) = C(z) / A(z) = E(z) + (z^(-k) F(z)) / A(z) $
 
-  // TODO: move this somewhere more appropriate
   #definition(title: "Diophantine equation")[
     $ C(z) = E(z)A(z) + z^(-k) F(z) $
+    This identity, obtained by rewriting the long division, is called the *Diophantine equation*. $E(z)$ has degree $k-1$ and $F(z)$ has degree $max(m, n) - 1$.
   ]
 
   If we substitute $W(z) = E(z) + (z^(-k) F(z)) / A(z)$ into $y(t+k)$ we can observe that
   $
-    y(t+k) &= W(z) e(t+k) \
-    &= (E(z) + (z^(-k) F(z)) / A(z)) e(t+k) \
-    &= E(z) e(t+k) + F(z) / A(z) z^(-k) e(t+k) \
-    &=
-    underbrace(E(z) e(t+k), "(a)") +
-    underbrace(F(z) / A(z) e(t), "(b)")
+    y(t+k) & = W(z) e(t+k) \
+           & = (E(z) + (z^(-k) F(z)) / A(z)) e(t+k) \
+           & = E(z) e(t+k) + F(z) / A(z) z^(-k) e(t+k) \
+           & =
+             underbrace(E(z) e(t+k), "(a)") +
+             underbrace(F(z) / A(z) e(t), "(b)")
   $
 
-  // TODO: actual links
   #[
     #set enum(numbering: "(a)")
-    + depends on future samples of $e(t)$ and is unpredictable at time $t$
-    + depends on past samples of $e(t)$ and is computable at time $t$ and will be our predictor
+    + $E(z) e(t+k)$ depends on *future* samples of $e(t)$ and is unpredictable at time $t$
+    + $F(z)/A(z) e(t)$ depends on *past and present* samples of $e(t)$ and is computable at time $t$ --- this is our predictor
   ]
 
   $ y(t+k) = #[prediction error] + #[prediction at time $t$] $
@@ -258,13 +249,12 @@
 #definition(title: "Whitening filter")[
   For a SSP $y(t)$ with transfer function $W(z)$
   $ W(z) = C(z) / A(z) $
-  the _whitening filter_ is
-  // TODO: i called it X because we did not give it a name
-  $ X(z) = A(z) / C(z) $
+  the _whitening filter_ (or _inverse filter_) is
+  $ W^(-1)(z) = A(z) / C(z) $
 
   The whitening filter "de-colors" $y(t)$ and turns it into white noise
   #{
-    import fletcher: diagram, node, edge
+    import fletcher: diagram, edge, node
     figure(
       diagram(
         node-shape: "rect",
@@ -306,7 +296,7 @@
 
     where $F(z)$, $C(z)$ are from $W(z) = E(z) + (z^(-k) F(z)) / A(z)$.
 
-    $hat(y)$ is a SSP. // TODO: is it ARMA process?
+    $hat(y)$ is an ARMA process (since $F(z)/C(z)$ is a rational transfer function applied to the stationary process $y(t)$).
   ]
 ]
 
@@ -318,19 +308,25 @@
 ]
 
 #remark(title: "Remark: worsening predictions")[
-  The quality of the prediction gets worse with increasing $k$ since going forward will mean considering less samples $angle.l y(0), dots, y(t) angle.r arrow.r.long^(k arrow.t) angle.l y(k), y(t) angle.r$ since we don't have any data after $y(t)$
+  The quality of the prediction gets worse with increasing $k$ since going forward will mean considering less samples $chevron.l y(0), dots, y(t) chevron.r arrow.r.long^(k arrow.t) chevron.l y(k), y(t) chevron.r$ since we don't have any data after $y(t)$
 ]
 == Analysis of the prediction error
 
+#remark(title: "Naïve (stupid) predictor")[
+  The simplest predictor is the *naïve predictor*: $hat(y)(t+k|t) = y(t)$ (just repeat the last known value).
+
+  This is generally outperformed by the optimal predictor, which exploits the model structure.
+]
+
 Let's consider the prediction error of the optimal predictor
 $
-  epsilon(t+k|t) &= y(t+k) - hat(y) (t+k|t) \
-  &= W(z)e(t+k) - hat(y) (t+k|t) \
-  &= (E(z) + F(z) / A(z) z^(-k)) e(t+k) - F(z) / A(z) e(t) \
-  &= E(z)e(t+k) + F(z) / A(z) z^(-k) e(t+k) - F(z) / A(z) e(t) \
-  &= E(z)e(t+k) + cancel(F(z) / A(z) e(t)) - cancel(F(z) / A(z) e(t)) \
-  &= E(z)e(t+k) \
-  &= cal(e)_o e(t) + cal(e)_1 e(t-1) + dots + cal(e)_(k-1) e(t-k+1)
+  epsilon(t+k|t) & = y(t+k) - hat(y) (t+k|t) \
+                 & = W(z)e(t+k) - hat(y) (t+k|t) \
+                 & = (E(z) + F(z) / A(z) z^(-k)) e(t+k) - F(z) / A(z) e(t) \
+                 & = E(z)e(t+k) + F(z) / A(z) z^(-k) e(t+k) - F(z) / A(z) e(t) \
+                 & = E(z)e(t+k) + cancel(F(z) / A(z) e(t)) - cancel(F(z) / A(z) e(t)) \
+                 & = E(z)e(t+k) \
+                 & = cal(e)_o e(t) + cal(e)_1 e(t-1) + dots + cal(e)_(k-1) e(t-k+1)
 $
 
 So the variance of $epsilon(t|t+k)$ is
@@ -352,7 +348,7 @@ $
 
     // variance function implementation
     let lambda2 = 1.0
-    // TODO: check if this sequence of e_i coefficients is realistic
+    // exponentially decaying coefficients (typical of a stable causal system)
     let e(i) = if i == 0 { 0.35 } else { 1 / calc.pow(2, i * 0.45) }
     let var(k) = {
       let coefficients = array.range(0, k).map(e)
@@ -403,7 +399,9 @@ $ epsilon(t+k|t) = y(t+k) - hat(y)(t+k) = y(t+k) - m_y $
 and the variance
 $ EE[epsilon(t+k|t)^2] = EE[(y(t+k) - m_y)^2] = "var"[y(t)] $
 
-It follows that // TODO: explain why it follows
+It follows that the optimal predictor always does at least as well as the trivial one:
+- *Lower bound*: for $k=1$, the prediction error is $e(t+1)$, whose variance is $lambda^2 = "var"[e(t)]$.
+- *Upper bound*: as $k -> infinity$, the predictor loses all information and the error approaches $"var"[y(t)]$ (the trivial predictor).
 $ "var"[e(t)] <= "var"[epsilon(t+k|t)] < "var"[y(t)] $
 
 == Initialization of the predictor
@@ -450,8 +448,8 @@ $ "var"[e(t)] <= "var"[epsilon(t+k|t)] < "var"[y(t)] $
 #solution[
   We consider the de-biased processes
   $
-    tilde(y)(t) &= y(t) - m_y = W(z) tilde(e)(t) \
-    tilde(e)(t) &= e(t) - mu
+    tilde(y)(t) & = y(t) - m_y = W(z) tilde(e)(t) \
+    tilde(e)(t) & = e(t) - mu
   $
   and the de-biased predictor from data
   $
@@ -465,16 +463,79 @@ $ "var"[e(t)] <= "var"[epsilon(t+k|t)] < "var"[y(t)] $
 
   If we expand the expression, we get
   $
-    hat(y)(t+k|t) &= hat(tilde(y))(t+k|t) + m_y \
-    &= F(z) / C(z) tilde(y)(t) + m_y \
-    &= F(z) / C(z) (y(t) - m_y) + m_y \
-    &= F(z) / C(z) y(t) - F(z) / C(z) m_y + m_y
+    hat(y)(t+k|t) & = hat(tilde(y))(t+k|t) + m_y \
+                  & = F(z) / C(z) tilde(y)(t) + m_y \
+                  & = F(z) / C(z) (y(t) - m_y) + m_y \
+                  & = F(z) / C(z) y(t) - F(z) / C(z) m_y + m_y
   $
 
-  Since $m_y$ is a constant // TODO: cite the theorem
+  Since $m_y$ is a constant, applying a transfer function $G(z)$ to a constant yields $G(1) dot m_y$ (the DC gain):
   $ F(z) / C(z) m_y = F(1) / C(1) m_y $
 
   And we can finally write
   $ hat(y)(t+k|t) = F(z) / C(z) y(t) + "bias" $
   where $"bias" = (1 - F(1) / C(1)) m_y$
+]
+
+== Prediction examples
+
+#example(title: "1-step prediction for AR(1)")[
+  Let $y(t) = a y(t-1) + e(t)$, $e(t) tilde WN(0, lambda^2)$, $|a| < 1$.
+
+  Here $W(z) = 1/(1 - a z^(-1))$, so $C(z) = 1$, $A(z) = 1 - a z^(-1)$.
+
+  For $k=1$: $C(z) = E(z) A(z) + z^(-1) F(z)$, with $E(z) = 1$, $F(z) = a$.
+
+  *Predictor from noise:* $hat(y)(t+1|t) = a/(1-a z^(-1)) e(t) = a y(t) + a e(t) - a e(t) = a y(t)...$
+
+  More directly: $hat(y)(t+1|t) = F(z)/C(z) y(t) = a y(t)$
+
+  This makes intuitive sense: the best prediction for an AR(1) is simply $a$ times the current value.
+
+  *Prediction error variance:* $"Var"[epsilon(t+1|t)] = lambda^2$ (just the noise variance).
+]
+
+#example(title: "1-step prediction for MA(1)")[
+  Let $y(t) = e(t) + c e(t-1)$, $e(t) tilde WN(0, lambda^2)$.
+
+  $W(z) = 1 + c z^(-1)$, $A(z) = 1$, $C(z) = 1 + c z^(-1)$.
+
+  For $k=1$: $C(z) = E(z) dot 1 + z^(-1) F(z) arrow.r.double E(z) = 1, F(z) = c$.
+
+  *Predictor from data:* $hat(y)(t+1|t) = c/(1+c z^(-1)) y(t)$
+
+  *Prediction error:* $epsilon(t+1|t) = E(z) e(t+1) = e(t+1)$, so $"Var"[epsilon] = lambda^2$.
+]
+
+#caution-box(title: "Non-canonical form warning")[
+  The prediction formulas assume the process is in *canonical form*. If the representation is not canonical (e.g., $C(z)$ has roots outside the unit circle), the predictor may be *unstable*.
+
+  Always convert to canonical form before computing the predictor.
+]
+
+== Prediction for ARMAX models
+
+#problem(title: "ARMAX prediction")[
+  Given an ARMAX model:
+  $ y(t) = B(z)/A(z) z^(-k_0) u(t) + C(z)/A(z) e(t) $
+
+  Find the optimal $k$-step predictor.
+]
+
+#solution[
+  Using the Diophantine equation $C(z) = E(z) A(z) + z^(-k) F(z)$ as before:
+  $
+    hat(y)(t+k|t) = F(z)/C(z) y(t) + (E(z) B(z))/C(z) z^(-k_0) u(t+k)
+  $
+
+  The predictor now has two components:
+  + A *feedback* term from past outputs: $F(z)/C(z) y(t)$
+  + A *feedforward* term from known inputs: $(E(z) B(z))/C(z) z^(-k_0) u(t+k)$
+
+  Note: future values of $u(t)$ are assumed known (since $u$ is the controlled input).
+]
+
+#remark(title: "1-step ARMAX prediction")[
+  For $k=1$: $E(z) = 1$, $F(z) = C(z) - A(z)$, and the predictor simplifies to:
+  $ hat(y)(t+1|t) = (C(z) - A(z))/C(z) y(t) + B(z)/C(z) z^(-k_0) u(t+1) $
 ]

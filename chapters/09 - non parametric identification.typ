@@ -28,11 +28,20 @@ Some of the most common non parametric estimators are:
   - $hat(mu)_N$ is a *correct* estimator of $mu^*$.
   - $hat(mu)_N$ is a *consistent* estimator of $mu^*$.
 ]
+
+#proof(title: "Unbiasedness of sample mean")[
+  $ EE[hat(mu)_N] = EE[1/N sum_(t=1)^N y(t)] = 1/N sum_(t=1)^N EE[y(t)] = 1/N dot N mu = mu $
+]
+
+#proof(title: "Consistency of sample mean")[
+  $ "Var"[hat(mu)_N] = "Var"[1/N sum_(t=1)^N y(t)] = 1/N^2 sum_(t_1=1)^N sum_(t_2=1)^N gamma(t_1 - t_2) $
+  Since $gamma(tau) -> 0$ as $tau -> infinity$ (for ergodic processes), this variance $-> 0$ as $N -> infinity$.
+]
 #properties-box(title: "Sample covariance function")[
   $ hat(gamma)_N (tau) = 1 / (N - |tau|) sum_(i=1)^(N - |tau|) y(i) y(i + tau) $
   - $hat(gamma)_N (tau)$ is a *correct estimator* of $gamma^* (tau)$.
   - $hat(gamma)_N (tau)$ is a *consistent estimator* of $gamma^* (tau)$.
-  We're going to use N- |tau| samples to compute the covariance function. This is a consequence of the fact that we need to have $y(t)$ and $y(t + tau)$ in the same dataset. The number of samples is going to decrease as $|tau| $increases.
+  We're going to use N- |tau| samples to compute the covariance function. This is a consequence of the fact that we need to have $y(t)$ and $y(t + tau)$ in the same dataset. The number of samples is going to decrease as $|tau|$increases.
 ]
 #properties-box(title: "Sample spectral density")[
   $ hat(Gamma)_N (omega) = 1 / (2 pi) sum_(tau = -(N - 1))^(N - 1) hat(R)_N (tau) e^(-j omega tau) $
@@ -55,4 +64,52 @@ Some of the most common non parametric estimators are:
   - We don't use the covariance function to compute the spectrum. We use directly the dataset.
   - The DFT is a *direct estimator* of the spectrum.
   - The DFT is *no longer a correct estimator* of the spectrum. The expectation of the DFT is not equal to the spectrum. But for large enough datasets, the DFT is a *asymptotically consistent estimator* of the spectrum.
+]
+
+=== Alternative covariance estimator
+
+#definition(title: "Alternative (non-normalized) covariance estimator")[
+  $ hat(gamma)'_N (tau) = 1/N sum_(t=1)^(N-|tau|) (y(t) - hat(mu)) (y(t+|tau|) - hat(mu)) $
+
+  This estimator divides by $N$ instead of $N - |tau|$.
+  - It is *biased* for finite $N$ (but asymptotically unbiased)
+  - However, the resulting Toeplitz matrix is guaranteed to be *positive semidefinite*, which is required for valid spectral estimation
+]
+
+=== Periodogram
+
+#definition(title: "Periodogram")[
+  $ hat(Gamma)_N^("per")(omega) = 1/N |sum_(t=0)^(N-1) y(t) e^(-j omega t)|^2 $
+
+  The periodogram is the squared magnitude of the DFT of the data, normalized by $N$.
+]
+
+#caution-box(title: "Inconsistency of the periodogram")[
+  The periodogram is *not a consistent* estimator of the spectrum:
+  $ "Var"[hat(Gamma)_N^("per")(omega)] arrow.r.not 0 "as" N -> infinity $
+
+  The variance does not decrease with $N$ — it remains proportional to $Gamma(omega)^2$.
+]
+
+=== Improved spectral estimators
+
+#definition(title: "Bartlett's method")[
+  Split the $N$ data points into $K$ non-overlapping segments of length $M = N/K$.
+  Compute the periodogram for each segment and average:
+  $ hat(Gamma)_N^("Bart")(omega) = 1/K sum_(k=1)^K hat(Gamma)_M^("per",k)(omega) $
+
+  This reduces variance by a factor of $K$, but also reduces frequency resolution.
+]
+
+#definition(title: "Windowing method")[
+  Apply a *window function* $w(tau)$ to the sample covariance before Fourier transforming:
+  $ hat(Gamma)_N^("win")(omega) = sum_(tau=-(M-1))^(M-1) w(tau) hat(gamma)_N(tau) e^(-j omega tau) $
+
+  Common windows: Bartlett (triangular), Hann, Hamming, Blackman.
+
+  The window should satisfy:
+  - $w(0) = 1$
+  - $w(tau) = w(-tau)$ (symmetric)
+  - $w(tau) = 0$ for $|tau| >= M$ (finite support)
+  - The resulting spectrum estimate should be non-negative
 ]

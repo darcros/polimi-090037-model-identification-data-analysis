@@ -8,20 +8,71 @@ $D_N = { (u(1), y(1)), (u(2), y(2)), \ldots, (u(N), y(N)) }$ our dataset of dime
 
 $M_theta = {M(Theta), theta in Theta subset RR^(n_theta)}$ the model we want to validate.
 
-$ hat(Theta)_N = argmin_theta J_N (theta)$ with $J_N (theta) = 1/N sum_{i=1}^N (y(i) - M_theta(u(i)))^2 $.
-
-//todo add figure to show different realizations of J_N generate different optimal parameters estimation
+$hat(Theta)_N = argmin_theta J_N (theta)$ with $J_N (theta) = 1/N sum_{i=1}^N (y(i) - M_theta(u(i)))^2$.
 
 #remark()[
   $hat(theta)$ is going to change with the dataset since it depends on the realization of our loss function $J_N$ and therefore our process $y(t)$ and noise $e(t)$.
 ]
+
+#figure(
+  cetz.canvas({
+    import cetz.draw: *
+
+    // Show multiple J_N curves (different realizations) each with its own minimum
+    let w = 8
+    let h = 4
+
+    // Axes
+    line((-0.5, 0), (w + 0.5, 0), stroke: gray + 0.5pt, mark: (end: ">"))
+    content((w + 0.8, -0.15), $theta$)
+    line((0, -0.3), (0, h + 0.3), stroke: gray + 0.5pt, mark: (end: ">"))
+    content((0.5, h + 0.4), $cal(J)_N$)
+
+    // Draw several parabolas with different minima (different realizations)
+    let curves = (
+      (center: 3.2, scale: 0.15, color: blue, label: $cal(J)_N^((1))$),
+      (center: 4.0, scale: 0.12, color: red, label: $cal(J)_N^((2))$),
+      (center: 3.6, scale: 0.18, color: green.darken(30%), label: $cal(J)_N^((3))$),
+    )
+
+    for curve in curves {
+      let pts = ()
+      for i in range(0, 41) {
+        let x = i * w / 40
+        let y = curve.scale * calc.pow(x - curve.center, 2) + 0.3
+        pts.push((x, y))
+      }
+      // Draw curve
+      for i in range(1, pts.len()) {
+        line(pts.at(i - 1), pts.at(i), stroke: curve.color + 0.8pt)
+      }
+      // Mark minimum
+      circle((curve.center, 0.3), radius: 0.06, fill: curve.color)
+      line(
+        (curve.center, 0),
+        (curve.center, 0.25),
+        stroke: (paint: curve.color, dash: "dotted", thickness: 0.6pt),
+      )
+    }
+
+    // Labels for minima
+    content((3.2, -0.3), text(fill: blue, size: 7pt, $hat(theta)_N^((1))$))
+    content((4.0, -0.3), text(fill: red, size: 7pt, $hat(theta)_N^((2))$))
+    content((3.6, -0.55), text(fill: green.darken(30%), size: 7pt, $hat(theta)_N^((3))$))
+
+    // Theoretical J
+    line((0.3, 0.6), (w - 0.3, 0.6), stroke: (paint: black, dash: "dashed", thickness: 0.5pt))
+    content((w + 0.1, 0.6), text(size: 7pt, $overline(cal(J))$))
+  }),
+  caption: [Different realizations of the data produce different empirical cost functions $cal(J)_N^((i))$, each with a different minimizer $hat(theta)_N^((i))$. As $N -> infinity$, they all converge to the theoretical $overline(cal(J))(theta)$.],
+)
 
 #theorem()[
   Under current assumptionss, as $N -> infinity$:
   $ J_N (hat(theta), s) -->_(N -> infinity) dash(J) (theta) = EE[epsilon (t|t-1, theta, s)^2] $
   Moreover, by letting
   $ Delta = {theta^*, J(theta^* <= dash(J)(theta^*) forall theta} $
-  be the set of global minima points of $ dash(J)(theta^*)$ we have
+  be the set of global minima points of $dash(J)(theta^*)$ we have
   $hat(theta_N) (s) -->_(N -> infinity) Delta$ with $PP(dot) = 1$
 ]
 
@@ -29,21 +80,18 @@ $ hat(Theta)_N = argmin_theta J_N (theta)$ with $J_N (theta) = 1/N sum_{i=1}^N (
   if $Delta= {theta^*}$ is a singleton we have that $ hat(theta_N) (s) -->_(N -> infinity) theta^* "with "PP(dot) = 1 $
 ]
 
-//todo add computations and diagrams about systems being the model class and delta being or not a singleton.
+#remark[
+  If $Delta$ is a singleton (the true system belongs to the model class with a unique parameterization), convergence is to a single point. If $cal(S) in.not cal(M)_theta$, the estimate converges to the *best approximation* within the class.
+]
 
 == Model order selection
-Let's find the best dimension of $cal(M)_theta$ such that our system $cal(S) in cal(M)_theta$
+Let's find the best dimension of $cal(M)_theta$ such that our system $cal(S) in cal(M)_theta$.
 
-// todo make this section actual code.
-$n := 1$
-
-$"while" n<= n_max$
-
-#h(0.7cm) $M_theta^((n)) = {M(theta), theta in Theta subset RR^(n_theta)}$
-
-#h(0.7cm) $hat(theta)_N^((n)) = argmin_theta J_N^((n))(theta)$
-
-#h(0.7cm) $J_N^((n))(theta) = 1 / N sum_(i=1)^N (y(i) - M_theta^((n))(u(i)))^2$
+The procedure is to sweep over increasing model orders $n = 1, 2, dots, n_max$:
++ Define the model class $cal(M)_theta^((n))$ of order $n$
++ Estimate $hat(theta)_N^((n)) = argmin_theta cal(J)_N^((n))(theta)$
++ Evaluate $cal(J)_N^((n))(hat(theta)_N^((n)))$
++ Select the order that best balances fit quality and model complexity
 
 
 #figure()[
@@ -94,7 +142,7 @@ $"while" n<= n_max$
   })
 ]
 
-#note-box[We see that our loss function $J_N  (theta)$ is inversely proportional to the number of parameters in the model. The more parameters we have, the better we can fit the data. But this is not always a good thing since we may be fitting the noise of the data too. To avoid *overfitting*, we need to find a balance between the number of parameters and the goodness of fit.]
+#note-box[We see that our loss function $J_N (theta)$ is inversely proportional to the number of parameters in the model. The more parameters we have, the better we can fit the data. But this is not always a good thing since we may be fitting the noise of the data too. To avoid *overfitting*, we need to find a balance between the number of parameters and the goodness of fit.]
 
 
 Three criteria for model order selections are
@@ -103,8 +151,49 @@ Three criteria for model order selections are
 + Identification of the model order penalties.
 
 
-==== Whiteness test on the residuals
-For a large enough $N$, $epsilon(t)$ is a white noise process, therefore we compute the covariance function or the spectrum of the prediction error to see if it has the same shape of a white noise's.
+==== Whiteness test on the residuals (Anderson's test)
+
+#definition(title: "Anderson's test")[
+  Given prediction errors $epsilon(t) = y(t) - hat(y)(t|t-1, hat(theta)_N)$, compute the sample auto-covariance:
+  $ hat(gamma)_epsilon (tau) = 1/N sum_(t=1)^(N-tau) epsilon(t) epsilon(t+tau) $
+
+  Under the null hypothesis $H_0$: $epsilon(t)$ is white noise, for large $N$:
+  $
+    hat(rho)_epsilon (tau) = hat(gamma)_epsilon (tau) / hat(gamma)_epsilon (0) tilde.dot cal(N)(0, 1/N) quad "for" tau != 0
+  $
+
+  The test checks whether $hat(rho)_epsilon (tau)$ falls within the *confidence band*:
+  $ |hat(rho)_epsilon (tau)| <= z_(alpha/2) / sqrt(N) quad forall tau = 1, 2, dots, T_max $
+
+  If any value exceeds the band, the model is inadequate at significance level $alpha$.
+]
+
+#remark(title: "Practical implementation")[
+  Typically $T_max approx N/4$ and $alpha = 0.05$ (95% confidence), giving bands $plus.minus 1.96/sqrt(N)$.
+
+  The test is applied to the *normalized* auto-covariance $hat(rho)(tau)$, not $hat(gamma)(tau)$.
+]
+
+==== Cross-correlation test
+
+#definition(title: "Cross-correlation test (for input-output models)")[
+  For models with exogenous input, we also test that the residuals are *uncorrelated with the input*:
+  $ hat(gamma)_(epsilon u)(tau) = 1/N sum_(t=1)^N epsilon(t) u(t-tau) $
+
+  Under $H_0$ (correct model):
+  $ hat(rho)_(epsilon u)(tau) tilde.dot cal(N)(0, 1/N) quad forall tau $
+
+  If the cross-correlation exceeds $plus.minus 1.96/sqrt(N)$, it indicates:
+  - Incorrect transfer function $B(z)/A(z)$ (if correlation at specific lags)
+  - Wrong delay $d$
+  - Missing dynamics
+]
+
+#caution-box[
+  The Anderson test (auto-correlation of residuals) checks the *noise model* $C(z)/A(z)$.
+  The cross-correlation test checks the *input-output model* $B(z)/A(z)$.
+  Both tests should be performed for input-output models.
+]
 
 ==== Cross validation with k fold
 We split the dataset into k folds. We train the model on k-1 folds and test it on the last fold. We repeat this process k times, each time using a different fold as the test set. We then compute the average error over all k folds.
@@ -172,8 +261,17 @@ Instead of minimizing J_N(theta), we can minimize a penalized version of it:
 ]
 
 + *FPE*: Final Prediction Error $"FPE" = (N+ n)/(N-n) J_N(theta)$
-+ *AIC*: Akaike Information Criterion $"AC"(n) = ln(J_N(theta)) + 2n/(N)$
++ *AIC*: Akaike Information Criterion $"AIC"(n) = ln(J_N(theta)) + 2n/(N)$
 + *MDL*: Minimum Description Length $"MDL"(n) = ln(J_N(theta)) + n ln(N)/(2N)$
+
+#properties(title: "Theoretical properties")[
+  - All three criteria are *consistent* for selecting the correct model order (as $N -> infinity$)
+  - *FPE* is derived from minimizing the expected prediction error on future data
+  - *AIC* is derived from minimizing the Kullback-Leibler divergence between the true and estimated distributions
+  - *MDL* is derived from information theory (minimum description length principle)
+  - *MDL* penalizes complexity more heavily than AIC $arrow.r$ tends to select simpler models
+  - For $N -> infinity$: MDL penalty $>$ AIC penalty, so MDL selects lower-order models
+]
 
 #note-box[
   If $cal(S) in cal(M)_theta$, and $cal(M)_theta$ is in the set of *ARX* model, MDL is right.

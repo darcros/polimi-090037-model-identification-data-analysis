@@ -6,7 +6,7 @@
   Given a system $cal(S)$, we collect samples of input $u(t)$ and output $y(t)$ in order to derive a model of the system.
 
   #{
-    import fletcher: diagram, node, edge
+    import fletcher: diagram, edge, node
     figure(
       diagram(
         spacing: (1em, 1em),
@@ -31,6 +31,25 @@
 ]
 
 == Parametric model identification
+
+=== Static modeling framework
+
+Before considering dynamic models, it is instructive to consider the static case.
+
+#definition(title: "Static model")[
+  $ y(t) = f(x(t), theta) + e(t) $
+  where $x(t)$ are known regressors (basis functions), $theta$ are parameters, $e(t)$ is noise.
+]
+
+#remark(title: "Basis function expansion")[
+  For linear-in-parameters models: $y(t) = phi(t)^TT theta + e(t)$, where $phi(t) = vec(f_1(x(t)), f_2(x(t)), dots.v, f_n(x(t)))$.
+
+  The basis functions $f_i$ can be polynomials, radial basis functions, wavelets, etc. Neural networks provide a form of *universal approximation*.
+]
+
+#remark(title: "Occam's razor")[
+  Model complexity should be as low as possible while still capturing the essential dynamics of the system. Overly complex models overfit the data and generalize poorly.
+]
 
 The parametric approach to model identification consists of the following steps:
 + Experiment design (and data collection)
@@ -71,9 +90,9 @@ When designing the experiment we need to:
 #example[
   Consider the class of $ARMAX(m, n, k, p)$ models
   $
-    mat(delim: #none, align: #left, row-gap: #1em, column-gap: #0.5em,
-      y(t) = #h(1em)
-      , , #hide[+] a_1 y(y-1), + a_2 y(t-2), dots, + a_m y(t-m);
+    mat(
+      delim: #none, align: #left, row-gap: #1em, column-gap: #0.5em,
+      y(t) = #h(1em), , #hide[+] a_1 y(y-1), + a_2 y(t-2), dots, + a_m y(t-m);
       , +b_0 u(t-k), +b_1 u(t-k-1), + b_2 u(t-k-2), dots, + b_m u(t-k-p);
       , +c_0 e(t), +c_1 e(t-1), + c_2 e(t-2), dots, + c_m e(t-n);
     )
@@ -103,13 +122,12 @@ When designing the experiment we need to:
 
     So $Theta = {a : |a| < 1} subset RR^1$ and our model class would be
     $cal(M)_theta = {AR(1), theta = a, |a| < 1}$
-    // FIXME: the notation for the model class is a bit weird, but it is what the prof. wrote so...
   ]
 ]
 
 === Choice of the identification criterion <model-ident:step-3>
 
-We use a _predictive approach_. We assume our model is good if the prediction error given by the predictor we have chosen to estimate our future value of our time series is low.// TODO: explain a little bit better
+We use a _predictive approach_: a model is considered good if it can accurately predict future values. The key idea is that if we found the "true" model, the prediction error would be white noise, and no further improvement would be possible.
 
 Our ideal objective would be
 $ cal(J)(theta) = EE[(y(t+1) - hat(y)(t+1|t, theta))^2] $
@@ -118,8 +136,7 @@ but that is not computable, because we only have *one* realization.
 So we use a sample-based version instead
 $ cal(J)(theta) = 1 / N sum_(t=1)^N (y(t+1) - hat(y)(t|t-1, theta))^2 $
 
-// TODO: explain better
-#remark[
+#remark(title: "Why 1-step ahead prediction")[
   We "look" 1-step ahead (instead of $2, 3, dots, k$) because
 
   $ epsilon(t+k|t) = y(t+k) - hat(y)(t+k|t) $
@@ -145,10 +162,105 @@ We will consider two situations:
 
 === Model validation
 
-// TODO: explain better the assumptions, why they could be wrong, what happens if they are
-During the process we made a few assumptions that must be verified in order to validate the quality of the model:
-- the system $cal(S)$ lies within the model class $cal(M)_theta$, meaning that the model has the same number of parameters, in the same structure and elevated to the correct magnitude.
-- $m$, $n$, $p$ are specified a priori to data have been "correctly" selected (they are informative)
+During the process we made assumptions that must be verified:
+- The system $cal(S)$ lies within the model class $cal(M)_theta$ (correct structure and order). If this fails, the identified model is the *best approximation* within the class, but may exhibit systematic bias.
+- The model orders $m$, $n$, $p$ have been "correctly" selected. If orders are too low, the model cannot capture the true dynamics; if too high, overfitting occurs (good fit on training data, poor generalization).
+- The input is persistently exciting of sufficient order. If this fails, the parameter estimate may be non-unique.
+
+== Model families and prediction forms
+
+#definition(title: "Model families")[
+  Common model families, classified by structure:
+  / Time series models: No exogenous input. AR, ARMA.
+  / Input-output models: With exogenous input. ARX, ARMAX, Output Error (OE), FIR, Box-Jenkins.
+
+  The key distinction is *how noise enters the model*:
+  - *Equation error* (ARX): noise enters additively after $A(z)$
+  - *Output error* (OE): noise is on the output only
+  - *ARMAX*: noise is filtered by $C(z)/A(z)$
+]
+
+#definition(title: "FIR model")[
+  The *Finite Impulse Response* model is a special case of ARX with $A(z) = 1$:
+  $ y(t) = B(z) u(t-d) + e(t) $
+  It has no feedback and is always stable, but may require many parameters.
+]
+
+#definition(title: "Prediction form")[
+  Every model can be written in *prediction form* for 1-step ahead prediction:
+  $ hat(y)(t|t-1, theta) = phi(t, theta)^TT theta $
+
+  - For ARX: $phi(t)$ depends only on past data $arrow.r$ *linear in data and parameters*
+  - For ARMAX: $phi(t, theta)$ depends on $theta$ through $C(z)$ $arrow.r$ *nonlinear in parameters*
+]
+
+== Prediction Error Methods (PEM)
+
+#definition(title: "PEM framework")[
+  The PEM approach minimizes:
+  $ cal(J)_N(theta) = 1/N sum_(t=1)^N epsilon(t, theta)^2, quad epsilon(t, theta) = y(t) - hat(y)(t|t-1, theta) $
+
+  The prediction error $epsilon(t, theta)$ depends on the model family:
+  - *ARX*: $epsilon(t, theta) = A(z) y(t) - B(z) u(t-d)$ $arrow.r$ linear in $theta$
+  - *ARMAX*: $epsilon(t, theta) = A(z)/C(z) y(t) - B(z)/C(z) u(t-d)$ $arrow.r$ nonlinear in $theta$
+]
+
+#theorem(title: "Asymptotic PEM properties")[
+  Under standard assumptions (stationary data, persistent excitation, true system in the model class):
+
+  As $N -> infinity$:
+  $ hat(theta)_N ->^p theta^* $
+  where $theta^*$ minimizes the theoretical (expected) cost $overline(cal(J))(theta) = EE[epsilon(t, theta)^2]$.
+
+  If the true system belongs to the model class, then $theta^* = theta_0$ (true parameters).
+]
+
+#remark(title: "Innovation form")[
+  When the true system belongs to the model class, the prediction error becomes white noise:
+  $ epsilon(t, theta_0) = e(t) tilde WN(0, lambda^2) $
+  This is the basis for model validation (testing whiteness of residuals).
+]
+
+=== LS properties for ARX models
+
+#theorem(title: "Unbiasedness of LS estimate")[
+  If the true system is an ARX model with the correct orders:
+  $ EE[hat(theta)_N] = theta_0 $
+  The LS estimate is *unbiased*.
+]
+
+#theorem(title: "Variance of LS estimate")[
+  $ "Var"[hat(theta)_N] = lambda^2 [sum_(t=1)^N phi(t) phi(t)^TT]^(-1) $
+  The variance decreases as $1/N$ with more data.
+]
+
+#remark(title: "Noise variance estimate")[
+  $ hat(lambda)^2 = cal(J)_N(hat(theta)_N) = 1/N sum_(t=1)^N epsilon(t, hat(theta)_N)^2 $
+  is a consistent estimate of $lambda^2$ (since $cal(J)(hat(theta)) = lambda^2$ for the optimal model).
+]
+
+=== Persistent excitation
+
+#definition(title: "Persistent Excitation (PE)")[
+  An input signal $u(t)$ is *persistently exciting of order $n$* if the information matrix
+  $ R_N = 1/N sum_(t=1)^N phi(t) phi(t)^TT $
+  is positive definite for sufficiently large $N$.
+
+  Equivalently, the Toeplitz matrix of input auto-covariances must be positive definite.
+]
+
+#remark[
+  - A *white noise* input is PE of any order
+  - A *sinusoidal* input at frequency $omega_0$ is PE of order 2 only
+  - A *PRBS* (Pseudo-Random Binary Sequence) is approximately PE of high order
+  - PE is necessary for the information matrix to be invertible, hence for identifiability
+]
+
+#definition(title: "Identifiability conditions")[
+  For the LS estimate $hat(theta)_N$ to be unique and well-defined:
+  + *Structural identifiability*: the model class $cal(M)(theta)$ is such that different $theta$ values give different models (no over-parameterization)
+  + *Experimental identifiability*: the input is persistently exciting of sufficient order (the information matrix is non-singular)
+]
 
 == Identification of ARX models
 
@@ -170,16 +282,16 @@ $ m_theta = m + p $
 
 We can rewrite the model as
 $
-  cal(M)(theta): quad& A(z)y(t) = B(z)u(t-d) + e(t) \
-  & bold(y(t) - y(t)) + A(z)y(t) = B(z)u(t-d) + e(t) \
-  & y(t) = (1- A(z))y(t) + B(z)u(t-d) + e(t)
+  cal(M)(theta): quad & A(z)y(t) = B(z)u(t-d) + e(t) \
+                      & bold(y(t) - y(t)) + A(z)y(t) = B(z)u(t-d) + e(t) \
+                      & y(t) = (1- A(z))y(t) + B(z)u(t-d) + e(t)
 $
 
 $
   y(t) = &underbrace((a_1 z^(-1) + dots + a_m z^(-m))y(t) + (b_0 + b_1 z^(-1) + dots + b_(p-1) z^(-p+1))u(t-d), "Available at time" t-1"," \ "predictable") + &underbrace(e(t), "Not available," \ "prediction error")
 $
 
-Isolating the predictable part of the model, we obtain the *predictor* of the class of models $ hat(cal(M))(theta)$:
+Isolating the predictable part of the model, we obtain the *predictor* of the class of models $hat(cal(M))(theta)$:
 $ hat(y)(t|t-1) = (a_1 z^(-1) + dots + a_m z^(-m))y(t) + (b_0 + b_1 z^(-1) + dots + b_(p-1) z^(-p+1))u(t-d)) $
 
 We can use this predictor to define our optimization task in the *cost function*:
@@ -188,9 +300,7 @@ $ cal(J)_N (theta) = 1 / N sum_(t=1)^N (y(t+1) - hat(y)(t|t-1, theta))^2 $
 
 #definition(title: "Regressor")[
   Given the class of predictor $hat(cal(M))(theta)$, it's called *regressor* the vector:
-  $
-    phi(t) = [y(t-1), y(t-2), dots, u(t-d), dots, u(t-d-p+1)]
-  $ namely, the vector of data points we're going to multiply by the chosen parameters to compute our our predictor.
+  $ phi(t) = [y(t-1), y(t-2), dots, u(t-d), dots, u(t-d-p+1)] $ namely, the vector of data points we're going to multiply by the chosen parameters to compute our our predictor.
 ]
 Using that structure, we can rewrite the predictor in a compact vectorial form:
 $ hat(y)(t|t-1) = theta^T phi(t) $
@@ -198,9 +308,9 @@ $ hat(y)(t|t-1) = theta^T phi(t) $
 That reflects on the cost function:
 
 $
-  cal(J)_N (theta) &= 1 / N sum_(t=1)^N (y(t+1) - hat(y)(t|t-1, theta))^2 \
-  &= 1 / N sum_(t=1)^N (y(t+1) - theta^T phi(t) )^2 \
-  &= 1 / N sum_(t=1)^N (y(t+1) - phi(t)^T theta )^2
+  cal(J)_N (theta) & = 1 / N sum_(t=1)^N (y(t+1) - hat(y)(t|t-1, theta))^2 \
+                   & = 1 / N sum_(t=1)^N (y(t+1) - theta^T phi(t) )^2 \
+                   & = 1 / N sum_(t=1)^N (y(t+1) - phi(t)^T theta )^2
 $
 
 #remark[
@@ -208,7 +318,48 @@ $
   For example, with $m_theta = 2$, $cal(J)_N$ is a paraboloid in $RR^3$.
 ]
 
-// TODO: plot Jn in R^3 as a paraboloid and show the global optimal
+#figure(
+  cetz.canvas({
+    import cetz.draw: *
+
+    // Draw a simple 2D contour-style representation of a paraboloid
+    // (isometric projection of level curves)
+    let cx = 0
+    let cy = 0
+
+    // Axes
+    line((-3.5, -1), (3.5, -1), stroke: gray + 0.5pt, mark: (end: ">"))
+    content((3.8, -1), $theta_1$)
+    line((-0.0, -2.5), (0.0, 2.5), stroke: gray + 0.5pt, mark: (end: ">"))
+    content((0.4, 2.6), $theta_2$)
+
+    // Elliptical contour lines (level sets of the paraboloid)
+    for r in (0.4, 0.9, 1.4, 2.0, 2.7) {
+      let rx = r * 1.3
+      let ry = r * 0.8
+      circle(
+        (cx, cy),
+        radius: (rx, ry),
+        stroke: if r == 0.4 { blue + 1pt } else { blue.lighten(30%) + 0.6pt },
+        fill: if r == 0.4 { blue.lighten(90%) } else { none },
+      )
+    }
+
+    // Optimal point
+    circle((cx, cy), radius: 0.06, fill: red)
+    content((0.6, 0.3), text(fill: red, size: 9pt, $hat(theta)_N$))
+
+    // Gradient arrow from some point to center
+    let p = (1.8, 1.0)
+    circle(p, radius: 0.05, fill: black)
+    line(p, (0.4, 0.22), stroke: (paint: red, thickness: 1pt), mark: (end: ">"))
+    content((2.3, 1.0), text(size: 8pt, $-nabla cal(J)_N$))
+
+    // Labels
+    content((2.5, -2.0), text(size: 8pt)[Level curves of $cal(J)_N (theta)$])
+  }),
+  caption: [For $m_theta = 2$, $cal(J)_N$ is a paraboloid. The contour lines are ellipses and the gradient points toward the unique global minimum $hat(theta)_N$.],
+)
 
 To find the global optimal $hat(theta)_N$ in general, the following two conditions must hold:
 - $hat(theta)_N$ is a *stationary point* of $cal(J)_N$, therefore the gradient must be null:
@@ -225,11 +376,11 @@ Let us analyze the gradient:
 
 $
   pdv(cal(J)_N (theta), theta) &= vec(pdv(cal(J)_N (theta), a_1), dots, pdv(cal(J)_N (theta), b_(p-1))) \
-  &= dv(,theta)[cal(J)_N (theta)] \
-  &= dv(,theta)[1 / N sum_(t=1)^N (y(t) - phi(t)^TT theta )^2]\
+  &= dv(, theta)[cal(J)_N (theta)] \
+  &= dv(, theta)[1 / N sum_(t=1)^N (y(t) - phi(t)^TT theta )^2]\
   // invert summation and derivative
-  &= 1 / N sum_(t=1)^N dv(,theta)[(y(t) - phi(t)^TT theta )^2]\
-  &= 1 / N sum_(t=1)^N 2(y(t) - phi(t)^TT theta ) underbrace((dv(,theta)[y(t) - phi(t)^TT theta ]), bold(-phi(t)) \ "Not transposed, to make" \ "the gradient a column vector")\
+  &= 1 / N sum_(t=1)^N dv(, theta)[(y(t) - phi(t)^TT theta )^2]\
+  &= 1 / N sum_(t=1)^N 2(y(t) - phi(t)^TT theta ) underbrace((dv(, theta)[y(t) - phi(t)^TT theta ]), bold(-phi(t)) \ "Not transposed, to make" \ "the gradient a column vector")\
   &= - 2 / N sum_(t=1)^N phi(t)(y(t) - phi(t)^TT theta )\
 $
 
@@ -245,7 +396,7 @@ $
 If $sum_(t=1)^N phi(t)phi(t)^TT$, called *information matrix*, is non-singular, then we can solve for $hat(theta)_N$:
 
 $
-  hat(theta)_N &= [sum_(t=1)^N phi(t)phi(t)^TT]^(-1) sum_(t=1)^N phi(t)y(t)\
+  hat(theta)_N & = [sum_(t=1)^N phi(t)phi(t)^TT]^(-1) sum_(t=1)^N phi(t)y(t) \
 $
 
 This result is called *ordinary least squares formulas*. It's the only case of explicit solution for identification problems adn depends on the data only.
@@ -253,13 +404,10 @@ This result is called *ordinary least squares formulas*. It's the only case of e
 Let's analyze the hessian matrix to check if the solution is a minimum:
 
 $
-
-// start from the gradient and then derive it (divide in two summations)
-pdv(cal(J)_N (theta), theta, 2) &= dv(,theta)[pdv(cal(J)_N (theta), theta)] \
-&= dv(,theta)[underbrace(- 2 / N sum_(t=1)^N phi(t)y(t), "Does not depends on" theta) + 2 / N sum_(t=1)^N phi(t) phi(t)^TT theta] \
-
-&= 0 + 2 / N sum_(t=1)^N phi(t)phi(t)^TT quad forall theta\
-
+  // start from the gradient and then derive it (divide in two summations)
+  pdv(cal(J)_N (theta), theta, 2) &= dv(, theta)[pdv(cal(J)_N (theta), theta)] \
+  &= dv(, theta)[underbrace(- 2 / N sum_(t=1)^N phi(t)y(t), "Does not depends on" theta) + 2 / N sum_(t=1)^N phi(t) phi(t)^TT theta] \
+  &= 0 + 2 / N sum_(t=1)^N phi(t)phi(t)^TT quad forall theta\
 $
 
 We need to check if that result is positive definite.
@@ -281,8 +429,8 @@ $
 We actually proved that
 $ x^T pdv(cal(J)_N (theta), theta, 2) x >= 0 quad forall x != 0 $
 that means that two cases can occour:
-- if $pdv(cal(J)_N (theta), theta, 2) succ 0 $ the hessian matrix is positive definite and $hat(theta)_N$ is a minimum;
-- if $pdv(cal(J)_N (theta), theta, 2) = 0 $ (degenerate case) the hessian matrix is singular and we have an infinite number of minimum points.
+- if $pdv(cal(J)_N (theta), theta, 2) succ 0$ the hessian matrix is positive definite and $hat(theta)_N$ is a minimum;
+- if $pdv(cal(J)_N (theta), theta, 2) = 0$ (degenerate case) the hessian matrix is singular and we have an infinite number of minimum points.
 
 There could be two reasons behind the degenerate case:
 - *experimantal identifiability issue*: data are not representive of the full underlying physical process; This means the information matrix $phi(t)phi(t)^T$ is not all informative and some data is the linear combination of some other data.
@@ -341,10 +489,10 @@ We're interested in the one step ahead predictor $k=1$.
 
 $
   longdiv(
-  #2,  C(z), A(z),
-  -A(z), E(z) = 1,
-  C(z)- A(z)
-)
+    #2, C(z), A(z),
+    -A(z), E(z) = 1,
+    C(z)- A(z)
+  )
 $
 
 Let's call $F(z)z^(-k) := C(z)- A(z)$ the rest of our long division.
@@ -369,13 +517,9 @@ $
 
 To update our parameters, there are various strategies. We could use *Newtons method* and find the tangent paraboloid around the current iteration of the estimate of , our parameter $Theta^((i))$, then take the minimum of the computed paraboloid as the new estimate of $J_N (theta)$
 
-//TODO maybe add figure of parabolic gradient descent
-
 $
   nu (Theta) = J_N (Theta^((i))) + pdv(J_N (Theta), Theta)_(Theta = Theta^((i))) (Theta - Theta^((i))) + 1 / 2 (Theta - Theta^((i)))^T pdv(J_N (Theta), Theta, 2)_(Theta = Theta^((i))) (Theta - Theta^((i)))
 $
-
-//TODO add the computation notes if we care
 
 === Results
 After computing the expressions of the Gradient and Hessian matrix, we can choose to update our parameters $theta^((i))$ always in the direction of the gradient, since it's going to give us the direction toward a stationary point of our loss function, and use the hessian matrix convex, hopefully or approximated definite positive to go towards a minima.
@@ -387,4 +531,61 @@ $ theta^((i+1)) = theta^((i)) - ["hessian"]^(-1) dot "gradient" $
   $ theta^((i+1)) = theta^((i)) - ["positive terms of the hessian"]^(-1) dot "gradient" $
 - *Gradient descent*: to have a scalar and fixed learning rate. Fastest and simplest method.
 $ theta^((i+1)) = theta^((i)) - eta ["gradient"] $
+
+=== ARMAX PEM details
+
+#definition(title: "Pseudo-regressor for ARMAX")[
+  The ARMAX 1-step predictor can be written as:
+  $ hat(y)(t|t-1, theta) = psi(t, theta)^TT theta $
+  where $psi(t, theta)$ is the *pseudo-regressor*:
+  $
+    psi(t, theta) = vec(y(t-1), dots, y(t-m), u(t-d), dots, u(t-d-p+1), epsilon(t-1, theta), dots, epsilon(t-n, theta))
+  $
+
+  Note: $psi$ depends on $theta$ through the past prediction errors $epsilon(t-i, theta)$.
+]
+
+#remark(title: "Initialization strategy")[
+  The iterative algorithm requires an initial guess $theta^((0))$. Common strategies:
+  - Start from the LS estimate of a simpler ARX model (ignoring $C(z)$)
+  - Use instrumental variables
+  - Try multiple random initializations and keep the best
+
+  The algorithm should be run until convergence: $||theta^((i+1)) - theta^((i))|| < "tolerance"$.
+]
+
+== Uncertainty of parameter estimates
+
+#theorem(title: "Variance of PEM estimates")[
+  For ARX models, the covariance matrix of $hat(theta)_N$ is:
+  $ "Var"[hat(theta)_N] = lambda^2 [sum_(t=1)^N phi(t) phi(t)^TT]^(-1) $
+
+  Asymptotically (as $N -> infinity$):
+  $ sqrt(N)(hat(theta)_N - theta_0) -> cal(N)(0, P) $
+  where $P$ depends on the model structure.
+]
+
+#remark(title: "Confidence intervals")[
+  For each parameter $theta_i$, the $(1-alpha)$ confidence interval is:
+  $ hat(theta)_(N,i) plus.minus z_(alpha\/2) sqrt("Var"[hat(theta)_(N,i)]) $
+  where $z_(alpha\/2)$ is the quantile of the standard normal distribution.
+]
+
+== Bias analysis
+
+#caution-box(title: "Wrong model class")[
+  If the true system does not belong to the selected model class, the LS estimate is generally *biased*:
+  $ EE[hat(theta)_N] != theta_0 $
+
+  Common sources of bias:
+  - Wrong model orders ($m, n, p$)
+  - Missing dynamics (e.g., using ARX when the true system is ARMAX)
+  - Correlated noise (using ARX when noise is colored by $C(z) != 1$)
+]
+
+#remark(title: "Bias in ARX with colored noise")[
+  If the true system is ARMAX but we fit an ARX model:
+  $ y(t) = B(z)/A(z) u(t-d) + C(z)/A(z) e(t) $
+  and we use $hat(y)(t|t-1) = phi(t)^TT theta$ (ARX predictor), the LS estimate will be *biased* because the noise term $C(z)/A(z) e(t)$ is not white and correlates with the regressor.
+]
 

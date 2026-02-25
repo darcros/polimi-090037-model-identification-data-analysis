@@ -36,3 +36,5 @@
 #include "chapters/08 - model validation.typ"
 #include "chapters/09 - non parametric identification.typ"
 #include "chapters/10 - data preprocessing.typ"
+#include "chapters/11 - time series analysis.typ"
+#include "chapters/A - cheatsheet.typ"

@@ -3,7 +3,7 @@
 = Modeling systems
 
 #{
-  import fletcher: diagram, node, edge
+  import fletcher: diagram, edge, node
   figure(
     diagram(
       node-shape: "rect",
@@ -34,7 +34,7 @@ Some challenges in model identification are:
 == Modeling error
 
 #{
-  import fletcher: diagram, node, edge
+  import fletcher: diagram, edge, node
   figure(
     diagram(
       node-shape: "rect",
@@ -67,5 +67,75 @@ Some challenges in model identification are:
 
   The system changes over time. The change can be
   - *Discrete*: described by difference equations: $y(t) = a dot y(t-1) + e(t)$
-  - *Continuous*: described by differential equations $dot(y)(t) = a dot y(t) + e(t) $
+  - *Continuous*: described by differential equations $dot(y)(t) = a dot y(t) + e(t)$
 ]
+
+== Dealing with uncertainty
+
+The natural assumption when building models is that the output can be determined exactly from the input.
+This is unrealistic because there are always signals beyond our control (measurement noise, uncontrollable inputs, etc.).
+The simplest way to deal with this is to introduce an *additive noise term* into the model:
+$ y(t) = f(u(t)) + v(t) $
+where $v(t)$ is a disturbance, whose value is _not known a priori_, but past values may allow reasonable estimates of future values using *probability theory*.
+
+== The estimation problem
+
+#definition(title: "Estimation problem")[
+  An estimation problem arises whenever there is an unknown parameter $theta$ whose value must be obtained from experimental observations.
+
+  - *Unknown quantity*: $theta$ (scalar or vector, constant or time-varying)
+  - *Observations*: $d = {d(t), t in T}$, with $T = {1, 2, dots, N}$
+]
+
+#definition(title: "Estimator and estimate")[
+  An *estimator* is a function $hat(theta) = f(d)$ that associates to the data a value of the parameter.
+
+  An *estimate* is the numerical value taken by the estimator for specific observed data.
+]
+
+#remark[
+  Two types of estimation:
+  - *Constant parameter* ($theta = "const"$) $arrow.r$ parametric estimation / identification
+  - *Time-varying parameter* ($theta(t)$) $arrow.r$
+    - $t > t_N$: *prediction*
+    - $t = t_N$: *filtering*
+    - $t < t_N$: *smoothing* (regularization / interpolation)
+]
+
+== The prediction problem
+
+Given a time series $v(1), v(2), dots, v(t-1)$, we want to predict $v(t)$.
+
+#definition(title: "Predictor")[
+  $ hat(v)(t|t-1) = f(v(t-1), v(t-2), dots, v(1)) $
+  Typically a *linear*, *finite-memory*, *time-invariant* function:
+  $ hat(v)(t|t-1) = a_1 v(t-1) + a_2 v(t-2) + dots + a_n v(t-n) $
+  with parameter vector $theta = mat(a_1, a_2, dots, a_n)^T$.
+]
+
+#definition(title: "Prediction error")[
+  $ epsilon(t) = v(t) - hat(v)(t|t-1) $
+  The prediction problem becomes an *identification* problem: finding $theta$ that minimizes the cost function
+  $ cal(J)(theta) = sum_(i=n+1)^(t-1) epsilon(i)^2 $
+]
+
+#remark[
+  Minimizing $cal(J)(theta)$ is *necessary but not sufficient*. We must also analyze the structure of the residual $epsilon(t)$:
+  - If $epsilon(t)$ has *non-zero mean* $arrow.r$ predictor systematically under/over-estimates
+  - If $epsilon(t)$ has *regular patterns* $arrow.r$ further information can be extracted to improve the predictor
+
+  If no regularity remains in $epsilon(t)$, the residual is a *white noise* and the predictor is optimal.
+]
+
+A predictor whose residual is white noise leads to the decomposition:
+$ v(t) = underbrace(hat(v)(t|t-1), "predictable part") + underbrace(epsilon(t), "white noise") $
+which, after substitution, yields the stochastic dynamical system:
+$ v(t) = a_1 v(t-1) + a_2 v(t-2) + dots + a_n v(t-n) + epsilon(t) $
+
+== Fundamental elements of identification
+
+The four fundamental elements of a system identification problem are:
++ *System ($cal(S)$)*: the data-generating mechanism (generally a stochastic dynamical system)
++ *Model ($cal(M)$)*: a parametric model with parameter vector $theta$; the choice of model family is a crucial decision
++ *Identification method ($cal(I)$)*: the tool for selecting the best model (typically an optimization procedure)
++ *Identification experiment ($cal(E)$)*: generates data for identification; the experimental conditions should maximize information content in the data

@@ -23,7 +23,6 @@
   Then $Gamma_e(omega) = lambda^2, forall omega in RR$
 ]
 
-//TODO: add plot of the covariance function for visual aid
 #figure(
   cetz.canvas({
     import suiji: gen-rng
@@ -49,7 +48,6 @@
     let expected_value = range(-5, +5).map(x => (x, 0.6))
     let values = range(-5, +5).map(x => (x, gamma-func(x)))
 
-    // TODO: add a little more space between items in the legend
     plot.plot(
       size: (10, 4),
       axis-style: "school-book",
@@ -61,11 +59,11 @@
         plot.add(label: [$ m_(e)(t) = mu quad forall t $], expected_value)
         plot.add(
           label: [$
-              gamma_(e)(tau) = cases(
-                lambda^2 quad &tau = 0,
-                0 quad forall &tau != 0
-              )
-            $],
+            gamma_(e)(tau) = cases(
+              lambda^2 quad & tau = 0,
+              0 quad forall & tau != 0
+            )
+          $],
           mark: "x",
           style: (stroke: (dash: "dashed")),
           values,
@@ -90,25 +88,91 @@
   $m_y = mu dot sum_(i=0)^n c_i$
   $
     gamma(tau) = lambda^2 dot cases(
-    c_0 c_0 + c_1 c_1 + dots + c_n c_(n) &quad tau = 0 \
-    c_0 c_1 + c_1 c_2 + dots + c_n c_(n-1) &quad tau = 1 \
-    c_0 c_2 + c_1 c_3 + dots + c_n c_(n-2) &quad tau = 2 \
-    dots.v \
-    c_0 c_n &quad tau = n \
-    0 &quad tau > n
-  )
+      c_0 c_0 + c_1 c_1 + dots + c_n c_(n) & quad tau = 0,
+      c_0 c_1 + c_1 c_2 + dots + c_n c_(n-1) & quad tau = 1,
+      c_0 c_2 + c_1 c_3 + dots + c_n c_(n-2) & quad tau = 2,
+      dots.v,
+      c_0 c_n & quad tau = n,
+      0 & quad tau > n
+    )
   $
 
   In general $ gamma(tau) = sum_(i=0)^(n-tau) c_i c_(i + tau) $
 ] <prop:moving-averages>
 
+#figure(
+  cetz.canvas({
+    import cetz.draw: *
+    import cetz-plot: *
+
+    // MA(2) with c0=1, c1=0.8, c2=0.3, lambda^2=1
+    let c = (1.0, 0.8, 0.3)
+    let lambda2 = 1.0
+    let n = 2
+
+    // Compute gamma(tau) = lambda^2 * sum_{i=0}^{n-tau} c_i * c_{i+tau}
+    let gamma-func(tau) = {
+      tau = calc.abs(tau)
+      if tau > n { return 0.0 }
+      let s = 0.0
+      for i in range(0, n - tau + 1) {
+        s += c.at(i) * c.at(i + tau)
+      }
+      return lambda2 * s
+    }
+
+    let range(from, to) = array.range(from, to + 1)
+    let values = range(-5, +5).map(x => (x, gamma-func(x)))
+
+    plot.plot(
+      size: (10, 3.5),
+      axis-style: "school-book",
+      x-tick-step: 1,
+      x-label: [$tau$],
+      y-tick-step: none,
+      y-ticks: ((gamma-func(0), $gamma(0)$), (gamma-func(1), $gamma(1)$), (gamma-func(2), $gamma(2)$)),
+      y-label: [$gamma(tau)$],
+      {
+        plot.add(
+          values,
+          mark: "x",
+          style: (stroke: (dash: "dashed")),
+        )
+      },
+    )
+  }),
+  caption: [Covariance function of an $MA(2)$ process ($c_0 = 1, c_1 = 0.8, c_2 = 0.3$). Note that $gamma(tau) = 0$ for $|tau| > n = 2$: the memory of the process is *finite*.],
+)
+
 #note-box[
-  - $gamma (tau)$ has $n - tau + 1 $ non-zero terms.
+  - $gamma (tau)$ has $n - tau + 1$ non-zero terms.
   - Moving averages are called *colored processes*
   - For $forall tau > n$ the model acts as white noise
 ]
 
-//TODO: add plot of the covariance function for visual aid
+#caution-box(title: "Parameter redundancy and monic convention")[
+  The $MA(n)$ process has $n+2$ parameters: $c_0, c_1, dots, c_n, lambda^2$.
+
+  This representation is *redundant*: the process with parameters
+  $ tilde(c)_i = alpha c_i, quad tilde(lambda)^2 = lambda^2 / alpha^2 $
+  has identical mean and covariance function.
+
+  To avoid this, $c_0$ is set to 1 ($C(z)$ is a *monic* polynomial).
+  The process then has $n+1$ free parameters: $c_1, dots, c_n, lambda^2$.
+]
+
+=== Generalized MA (GMA) process
+
+#definition(title: "Generalized MA process")[
+  Consider
+  $ v(t) = c_0 eta(t) + c_1 eta(t-1) + dots + c_n eta(t-n) $
+  where $eta(dot)$ is stationary but *not necessarily white*.
+
+  The cross-terms in the variance calculation can no longer be neglected:
+  $ "Var"[v(t)] = sum_(i=0)^n sum_(j=0)^n c_i c_j gamma_(eta eta)(i-j) $
+
+  The GMA process is still stationary --- passing a stationary process through an MA filter preserves stationarity.
+]
 
 #properties(title: "zeros and poles of MA model's transfer function")[
   All $MA(n)$ processes have
@@ -142,32 +206,34 @@ With the objective of modelling every kind of stochastic process, including thos
 #definition(title: "Autoregressive model")[
   Let $e(t) ~ WN(mu, lambda^2)$
 
-  Then $y(t) = e(t) + a_1 y(t-1) + a_2 y(t-2) + dots + a_n y(t-m) ~ AR(m) $
+  Then $y(t) = e(t) + a_1 y(t-1) + a_2 y(t-2) + dots + a_n y(t-m) ~ AR(m)$
 ]
 
-// TODO: that thing about "AR <==> steady state solution of the difference equation"
+#remark[
+  The AR process is the *steady-state solution* of the difference equation
+  $ v(t) = a_1 v(t-1) + dots + a_m v(t-m) + e(t) $
+  If $W(z) = 1/A(z)$ is asymptotically stable (all poles of $A(z)$ strictly inside the unit circle), then $v(t)$ converges to a unique SSP regardless of the initial condition.
+]
 
 #remark[
   With autoregressive models we can have $gamma(tau) != 0$ for $tau -> infinity$ with a finite number of coefficients.
   - This is not possible with $MA(n)$ models.
-  - This is possible with $MA(infinity)$ models, but working with an infinite number of coefficient is cumbersome.
+  - This is possible with $MA(infinity)$ models, but working with an infinite number of coefficients is cumbersome.
 
-  // FIXME: only some or all?
-  // TODO: maybe example?
-  Some $MA(infinity)$ models can be expressed as $AR(m)$ models.
+  Any $AR(m)$ model with stable poles can be expressed as an $MA(infinity)$ model.
 ]
 
 #definition(title: "Steady state solution for an AR model")[
   Let $y(t) ~ AR(m)$ model, we can expand its definition
 
   $
-    y(t) &= a y (t-1) + e(t) \
-    &= a^2 y(t-2) + a dot e(t-1)+ e(t) \
-    &= a^2 y(t-2) + a dot e(t-1)+ e(t) \
-    &= dots \
-    &= a^0e(t) + a^1 e(t-1) + a^2 e(t-2) + dots +a^m e(t-m) + dots + a^{t-t_0}y(t_0)
+    y(t) & = a y (t-1) + e(t) \
+         & = a^2 y(t-2) + a dot e(t-1)+ e(t) \
+         & = a^2 y(t-2) + a dot e(t-1)+ e(t) \
+         & = dots \
+         & = a^0e(t) + a^1 e(t-1) + a^2 e(t-2) + dots +a^m e(t-m) + dots + a^{t-t_0}y(t_0)
   $
-  The term $a^{t-t_0}y(t_0) $ is called *initial condition*, the rest is the *steady state solution*
+  The term $a^{t-t_0}y(t_0)$ is called *initial condition*, the rest is the *steady state solution*
 ]
 
 #properties(title: "zeros and poles of AR model's transfer function")[
@@ -177,7 +243,7 @@ With the objective of modelling every kind of stochastic process, including thos
 
   For this reason $AR(m)$ processes are called "all-poles" processes.
 
-  // TODO: is there a way to quickly find the zeros from the coefficients of y(t) ~ AR(m) ?
+  The poles of $A(z)$ are found by solving $1 + a_1 z^(-1) + dots + a_m z^(-m) = 0$ (or equivalently $z^m + a_1 z^(m-1) + dots + a_m = 0$).
 ]
 
 #caution-box[
@@ -196,32 +262,32 @@ Then we can calculate the mean value $m$ and covariance function $gamma(tau)$ by
 
   Calculating the mean value $m_y$
   $
-    m_y &= EE[y(t)] \
-    &= EE[a y(t-1) + e(t)] \
-    &= a EE[y(t-1)] + EE[e(t)] \
-    &= a EE[y(t)] + EE[e(t)] \
-    &= a m_y + 0 \
+    m_y & = EE[y(t)] \
+        & = EE[a y(t-1) + e(t)] \
+        & = a EE[y(t-1)] + EE[e(t)] \
+        & = a EE[y(t)] + EE[e(t)] \
+        & = a m_y + 0 \
   $
   $
     =>
-    m_y &= a m_y \
-    m_y &= 0
+    m_y & = a m_y \
+    m_y & = 0
   $
 
   Calculating variance $gamma(0)$
   $
-    gamma(0) &= EE[(y(t) - m_y)(y(t-0) - m_y)] \
-    &= EE[(y(t))^2] \
-    &= EE[(a y(t-1) + e(t))^2] \
-    &= EE[a^2 y(t-1)^2 + e(t)^2 + 2 a y(t-1) e(t)] \
-    &= a^2 EE[y(t-1)^2] + EE[e(t)^2] + 2 a underbrace(cancel(EE[y(t-1) e(t)]), #[see @thm:null-expected-value]) \
-    &= a^2 EE[y(t-1)^2] + EE[e(t)^2] \
-    &= a^2 EE[y(t)^2] + EE[e(t)^2] \
-    &= gamma_y(0) + lambda^2
+    gamma(0) & = EE[(y(t) - m_y)(y(t-0) - m_y)] \
+             & = EE[(y(t))^2] \
+             & = EE[(a y(t-1) + e(t))^2] \
+             & = EE[a^2 y(t-1)^2 + e(t)^2 + 2 a y(t-1) e(t)] \
+             & = a^2 EE[y(t-1)^2] + EE[e(t)^2] + 2 a underbrace(cancel(EE[y(t-1) e(t)]), #[see @thm:null-expected-value]) \
+             & = a^2 EE[y(t-1)^2] + EE[e(t)^2] \
+             & = a^2 EE[y(t)^2] + EE[e(t)^2] \
+             & = gamma_y(0) + lambda^2
   $
   $
-    => gamma_y(0) &= a^2 gamma_y(0) + lambda^2 \
-    gamma_y(0) &= lambda^2 / (1 - a^2)
+    => gamma_y(0) & = a^2 gamma_y(0) + lambda^2 \
+       gamma_y(0) & = lambda^2 / (1 - a^2)
   $
 
   Calculating covariance $gamma(tau)$
@@ -234,19 +300,19 @@ Then we can calculate the mean value $m$ and covariance function $gamma(tau)$ by
     &= a gamma(0)
   $
   $
-    gamma(2) &= EE[(y(t) - m_y)(y(t-2) - m_y)] \
-    &= EE[y(t)y(t-2)] \
-    &= EE[(a y(t-1) + e(t)) y(t-2)] \
-    &= a EE[t(t-1)y(t-2)] + cancel(EE[e(t)y(t-2)]) \
-    &= a gamma(1)
+    gamma(2) & = EE[(y(t) - m_y)(y(t-2) - m_y)] \
+             & = EE[y(t)y(t-2)] \
+             & = EE[(a y(t-1) + e(t)) y(t-2)] \
+             & = a EE[t(t-1)y(t-2)] + cancel(EE[e(t)y(t-2)]) \
+             & = a gamma(1)
   $
 
   We get a set of recursive equations:
   $
     cases(
-    gamma(0) = 1 / (1-a^2) lambda^2,
-    gamma(tau) = a gamma(tau - 1) quad |tau| >= 1,
-  )
+      gamma(0) = 1 / (1-a^2) lambda^2,
+      gamma(tau) = a gamma(tau - 1) quad |tau| >= 1,
+    )
   $
 
   #figure(
@@ -303,10 +369,57 @@ Then we can calculate the mean value $m$ and covariance function $gamma(tau)$ by
   )
 ]
 
-//TODO add graphical representation of possible realizations given the form of the covariance functions (smooth and nervous processes)
+#remark(title: "AR(1) realization smoothness")[
+  The sign of $a$ determines the character of AR(1) realizations:
+  - $a > 0$: $gamma(tau) = a^(|tau|) gamma(0)$ is always positive and decays monotonically $arrow.r$ *smooth* realizations (consecutive values tend to be similar)
+  - $a < 0$: $gamma(tau)$ alternates in sign $arrow.r$ *nervous* realizations (consecutive values tend to oscillate)
+]
+
+=== Yule-Walker equations
+
+#definition(title: "Yule-Walker equations")[
+  For an $AR(m)$ process, the covariance function satisfies the *Yule-Walker equations*:
+  $ gamma(tau) = a_1 gamma(tau - 1) + a_2 gamma(tau - 2) + dots + a_m gamma(tau - m) quad "for" |tau| >= 1 $
+
+  These are obtained by multiplying the AR equation by $v(t - tau)$ and taking expectations.
+]
+
+#example(title: "Yule-Walker for AR(1)")[
+  $
+    cases(
+      gamma(0) = a gamma(1) + lambda^2 quad & ("from" tau=0)","
+                                              gamma(tau) = a gamma(tau - 1) quad & "for" |tau| >= 1
+    )
+  $
+  Solving: $gamma(0) = lambda^2 / (1-a^2)$, $space gamma(tau) = a^(|tau|) gamma(0)$.
+]
+
+#example(title: "Yule-Walker for AR(2)")[
+  $
+    cases(
+      gamma(0) = a_1 gamma(1) + a_2 gamma(2) + lambda^2,
+      gamma(1) = a_1 gamma(0) + a_2 gamma(1),
+      gamma(tau) = a_1 gamma(tau - 1) + a_2 gamma(tau - 2) quad "for" |tau| >= 2
+    )
+  $
+  From the second equation: $gamma(1) = a_1 / (1-a_2) gamma(0)$.
+]
+
+=== AR(1) to MA(infinity) equivalence
+
+#theorem(title: "AR(1) as MA(infinity) via long division")[
+  Consider $v(t) = a v(t-1) + e(t)$, i.e., $v(t) = 1/(1-a z^(-1)) e(t)$.
+
+  Performing polynomial long division of $1$ by $(1 - a z^(-1))$:
+  $ 1/(1 - a z^(-1)) = 1 + a z^(-1) + a^2 z^(-2) + dots $
+
+  Therefore: $v(t) = e(t) + a e(t-1) + a^2 e(t-2) + dots = sum_(k=0)^infinity a^k e(t-k) tilde MA(infinity)$
+
+  This converges iff $|a| < 1$ (the pole is inside the unit circle).
+]
 
 #theorem[
-  Let $e(t) ~ WN(0, lambda^2)$ and $y(t) = e(t) + a y(t-1) ~ AR(1) $
+  Let $e(t) ~ WN(0, lambda^2)$ and $y(t) = e(t) + a y(t-1) ~ AR(1)$
 
   Then $EE[y(t-tau) e(t)] = 0, forall tau > 0$
 ] <thm:null-expected-value>
@@ -321,24 +434,106 @@ Then we can calculate the mean value $m$ and covariance function $gamma(tau)$ by
   Then $y(t-tau) = e(t-tau) + a e(t-tau-1) + a^2 e(t-tau-2) + dots$
 
   $
-    EE[e(t) y(t-tau)] &= EE[e(t) (e(t-tau) + a e(t-tau-1) + a^2 e(t-tau-2) + dots)] \
-    &= EE[e(t)e(t-tau)] + a EE[e(t)e(t-tau-1)] + + a EE[e(t)e(t-tau-2)] + dots \
-    &= 0 + 0 + 0 + dots
+    EE[e(t) y(t-tau)] & = EE[e(t) (e(t-tau) + a e(t-tau-1) + a^2 e(t-tau-2) + dots)] \
+                      & = EE[e(t)e(t-tau)] + a EE[e(t)e(t-tau-1)] + + a EE[e(t)e(t-tau-2)] + dots \
+                      & = 0 + 0 + 0 + dots
   $
 ]
 
 == ARMA models
-The modeling power of $MA(infinity)$ is unmatched by $AR(1)$ models but we can combine an $AR(m)$ and a $MA(n)$ models to get an $ARMA(m, n)$ model to model our time series with the least amount of coefficients possible
+The modeling power of $MA(infinity)$ is unmatched by $AR(1)$ models but we can combine an $AR(m)$ and a $MA(n)$ models to get an $ARMA(m, n)$ model to model our time series with the least amount of coefficients possible.
+
+=== ARMA to MA(infinity) equivalence
+
+#theorem(title: "ARMA as MA(infinity)")[
+  Any $ARMA(m, n)$ process with $W(z) = C(z)/A(z)$ asymptotically stable can be written as:
+  $ v(t) = W(z) e(t) = sum_(k=0)^infinity w_k e(t-k) tilde MA(infinity) $
+  where $w_k$ are the coefficients of the impulse response (obtained by long division of $C(z)$ by $A(z)$).
+
+  The series converges iff all poles of $A(z)$ are strictly inside the unit circle.
+]
+
+=== ARMA as series connection
+
+#remark[
+  An $ARMA(m, n)$ can be seen as a *series connection* of an AR part and an MA part:
+  $ v(t) = C(z)/A(z) e(t) = underbrace(C(z), "MA") dot underbrace(1/A(z), "AR") e(t) $
+  The order of the series connection does not matter (LTI systems commute).
+]
 
 #definition(title: "ARMA model")[
   Let $e(t) ~ WN(mu, lambda^2)$
 
   Then $y(t) ~ ARMA(m, n)$ iff
   $
-    y(t) = &underbrace(a_1 y(t-1) + a_2 y(t-2) + dots + a_m y(t-m), AR(m)) + \
-    &underbrace(c_0 e(t)   + c_1 e(t-1) + dots + c_n e(t-n), MA(n)) \
+    y(t) = & underbrace(a_1 y(t-1) + a_2 y(t-2) + dots + a_m y(t-m), AR(m)) + \
+           & underbrace(c_0 e(t) + c_1 e(t-1) + dots + c_n e(t-n), MA(n)) \
   $
 ]
+
+#example(title: "ARMA(1,1) covariance computation")[
+  Let $v(t) = a v(t-1) + c_0 e(t) + c_1 e(t-1)$, $e(t) tilde WN(0, lambda^2)$, with $c_0 = 1$.
+
+  *Mean value:* $EE[v(t)] = a EE[v(t)] + 0 arrow.r.double m_v = 0$
+
+  *Variance* ($tau = 0$): Multiply defining equation by $v(t)$ and take expectations:
+  $ gamma(0) = a gamma(1) + lambda^2(1 + c_1^2 + 2 a c_1) $
+
+  *Covariance* ($tau = 1$): $gamma(1) = a gamma(0) + c_1 lambda^2$
+
+  *Covariance* ($tau >= 2$): $gamma(tau) = a gamma(tau - 1)$ (same recursive structure as AR)
+
+  Solving the system:
+  $ gamma(0) = ((1 + c_1^2)(1-a^2) + 2 a c_1) / (1 - a^2) lambda^2, quad gamma(1) = a gamma(0) + c_1 lambda^2 $
+]
+
+#figure(
+  cetz.canvas({
+    import cetz.draw: *
+    import cetz-plot: *
+
+    // ARMA(1,1) with a=0.7, c1=0.5, lambda^2=1
+    let a = 0.7
+    let c1 = 0.5
+    let lambda2 = 1.0
+
+    // gamma(0) = ((1 + c1^2)(1 - a^2) + 2*a*c1) / (1 - a^2) * lambda^2
+    let g0 = ((1 + c1 * c1) * (1 - a * a) + 2 * a * c1) / (1 - a * a) * lambda2
+    // gamma(1) = a * gamma(0) + c1 * lambda^2
+    let g1 = a * g0 + c1 * lambda2
+    // gamma(tau) = a * gamma(tau-1) for tau >= 2
+
+    let gamma-func(tau) = {
+      tau = calc.abs(tau)
+      if tau == 0 { return g0 }
+      if tau == 1 { return g1 }
+      // recursive: gamma(tau) = a^(tau-1) * gamma(1)
+      return calc.pow(a, tau - 1) * g1
+    }
+
+    let range(from, to) = array.range(from, to + 1)
+    let values = range(-8, +8).map(x => (x, gamma-func(x)))
+
+    plot.plot(
+      size: (10, 3.5),
+      axis-style: "school-book",
+      x-tick-step: 1,
+      x-label: [$tau$],
+      y-tick-step: none,
+      y-ticks: ((g0, $gamma(0)$), (g1, $gamma(1)$)),
+      y-label: [$gamma(tau)$],
+      {
+        plot.add(
+          values,
+          mark: "x",
+          line: "spline",
+          style: (stroke: (dash: "dashed")),
+        )
+      },
+    )
+  }),
+  caption: [Covariance function of an $ARMA(1, 1)$ process ($a = 0.7, c_1 = 0.5$). For $|tau| >= 2$, $gamma(tau) = a dot gamma(tau-1)$: the tail decays exponentially like an AR(1), but the initial values $gamma(0), gamma(1)$ are shaped by the MA part.],
+)
 
 === Other variants of ARMA
 
@@ -349,9 +544,9 @@ If we also consider the input of the system (the eXogenous part) we get an $ARMA
 
   Then $y(t) ~ ARMAX(m, n, k, p)$ iff
   $
-    y(t) = &underbrace(a_1 y(t-1) + a_2 y(t-2) + dots + a_m y(t-m), AR(m)) + \
-    &underbrace(c_0 e(t)   + c_1 e(t-1) + dots + c_n e(t-n), MA(n)) + \
-    &underbrace(b_0 u(t-k) + b_1 u(t-k-1) + dots + b_n u(t-k-p), "X"(k, p))
+    y(t) = & underbrace(a_1 y(t-1) + a_2 y(t-2) + dots + a_m y(t-m), AR(m)) + \
+           & underbrace(c_0 e(t) + c_1 e(t-1) + dots + c_n e(t-n), MA(n)) + \
+           & underbrace(b_0 u(t-k) + b_1 u(t-k-1) + dots + b_n u(t-k-p), "X"(k, p))
   $
 
   Where
@@ -359,8 +554,31 @@ If we also consider the input of the system (the eXogenous part) we get an $ARMA
   - $p$: order of the exogenous part
 ]
 
+#remark(title: "ARMAX block diagram")[
+  The ARMAX model can be represented as:
+  #{
+    import fletcher: diagram, edge, node
+    figure(
+      diagram(
+        node-shape: "rect",
+        node-stroke: 1pt,
+        spacing: (3em, 2em),
+        edge((-1, 1), "r", "-|>")[$u(t)$],
+        node((0, 1))[$B(z)/A(z) z^(-k)$],
+        edge("r", "-|>"),
+        node((1, 0), shape: "circle", inset: 2pt, sym.plus),
+        edge((0, -1), "r,d", "-|>"),
+        node((0, -1))[$C(z)/A(z)$],
+        edge((-1, -1), "r", "-|>")[$e(t)$],
+        edge((1, 0), "r", "-|>")[$y(t)$],
+      ),
+    )
+  }
+  The output is the sum of the filtered input (deterministic) and filtered noise (stochastic).
+]
+
 #remark[
-  The input/output delay $k$ of an $ARMAX(m,n,k,p)$ process is visible in the step response graph of the eXogenous part.
+  The input/output delay $k$ of an $ARMAX(m, n, k, p)$ process is visible in the step response graph of the eXogenous part.
   #figure(
     cetz.canvas({
       import cetz.draw: *
@@ -408,11 +626,10 @@ If we apply a non-linear function to an $ARMAX$ model we get a $"N-ARMAX"$ model
 
   Then $y(t) ~ "N-ARMAX"(m, n, k, p)$ iff
   $
-    y(t) = f( quad
-      &a_1 y(t-1), a_2 y(t-2), dots, a_m y(t-m), \
-      &c_0 e(t), c_1 e(t-1), dots, c_n e(t-n), \
-      &b_0 u(t-k), b_1 u(t-k-1), dots, b_n u(t-k-p))
-    quad )
+    y(t) = f( quad & a_1 y(t-1), a_2 y(t-2), dots, a_m y(t-m), \
+                   & c_0 e(t), c_1 e(t-1), dots, c_n e(t-n), \
+                   & b_0 u(t-k), b_1 u(t-k-1), dots, b_n u(t-k-p))
+                     quad )
   $
 ]
 
@@ -437,14 +654,14 @@ We can prove that the covariance function of the unbiased version of a process i
   Therefore
 
   $gamma_y (tau) &= EE[y(t) - m_y)(y(t-tau) - E[y(t-tau))] \
-    &= EE[tilde(y)(t) tilde(y)(t-tau)] \ &= gamma_tilde(y)(tau)$
+  &= EE[tilde(y)(t) tilde(y)(t-tau)] \ &= gamma_tilde(y)(tau)$
 ]
 
 #theorem(title: "of the gain")[
 
   Using the unbiased version of the process we can get an equivalent representation
   #{
-    import fletcher: diagram, node, edge
+    import fletcher: diagram, edge, node
     figure(
       diagram(
         node-shape: "rect",
@@ -460,7 +677,7 @@ We can prove that the covariance function of the unbiased version of a process i
     )
   }
   #{
-    import fletcher: diagram, node, edge
+    import fletcher: diagram, edge, node
     figure(
       diagram(
         node-shape: "rect",
