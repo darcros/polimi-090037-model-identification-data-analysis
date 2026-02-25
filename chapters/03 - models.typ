@@ -90,11 +90,11 @@
   $m_y = mu dot sum_(i=0)^n c_i$
   $
     gamma(tau) = lambda^2 dot cases(
-    c_0 c_0 + c_1 c_1 + dots + c_n c_(n) &quad tau = 0 \
-    c_0 c_1 + c_1 c_2 + dots + c_n c_(n-1) &quad tau = 1 \
-    c_0 c_2 + c_1 c_3 + dots + c_n c_(n-2) &quad tau = 2 \
-    dots.v \
-    c_0 c_n &quad tau = n \
+    c_0 c_0 + c_1 c_1 + dots + c_n c_(n) &quad tau = 0,
+    c_0 c_1 + c_1 c_2 + dots + c_n c_(n-1) &quad tau = 1,
+    c_0 c_2 + c_1 c_3 + dots + c_n c_(n-2) &quad tau = 2,
+    dots.v,
+    c_0 c_n &quad tau = n,
     0 &quad tau > n
   )
   $
