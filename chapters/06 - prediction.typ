@@ -62,7 +62,7 @@
 ]
 
 #definition(title: "Linear predictor")[
-  An "optimal" linear predictor contains both information about the model information $angle.l alpha_0, alpha_1, dots angle.r$ and the data $ angle.l y(t), y(t-1), dots angle.r$.
+  An "optimal" linear predictor contains both information about the model information $chevron.l alpha_0, alpha_1, dots chevron.r$ and the data $ chevron.l y(t), y(t-1), dots chevron.r$.
   $
     hat(y)(t+k|t) &= alpha_0 y(t) + alpha_1 y(t - 1) + dots \
     &= sum_(i=0)^(+infinity) (alpha_i) y(t-i)
@@ -318,7 +318,7 @@
 ]
 
 #remark(title: "Remark: worsening predictions")[
-  The quality of the prediction gets worse with increasing $k$ since going forward will mean considering less samples $angle.l y(0), dots, y(t) angle.r arrow.r.long^(k arrow.t) angle.l y(k), y(t) angle.r$ since we don't have any data after $y(t)$
+  The quality of the prediction gets worse with increasing $k$ since going forward will mean considering less samples $chevron.l y(0), dots, y(t) chevron.r arrow.r.long^(k arrow.t) chevron.l y(k), y(t) chevron.r$ since we don't have any data after $y(t)$
 ]
 == Analysis of the prediction error
 
