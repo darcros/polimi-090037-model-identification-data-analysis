@@ -160,6 +160,54 @@ We will consider two situations:
 - $cal(J)(theta)$ is quadratic, this is the case for $AR$ and $"ARX"$ models
 - $cal(J)(theta)$ is non-quadratic, this is the case for $ARMA$ and $ARMAX$ models
 
+#figure(
+  grid(
+    columns: 2,
+    gutter: 2em,
+    cetz.canvas({
+      import cetz.draw: *
+
+      // Quadratic (ARX): paraboloid contours, single minimum
+      let cx = 0
+      let cy = 0
+      line((-3, -1.5), (3, -1.5), stroke: gray + 0.5pt, mark: (end: ">"))
+      content((3.3, -1.5), $theta_1$)
+      line((0, -2.5), (0, 2.5), stroke: gray + 0.5pt, mark: (end: ">"))
+      content((0.4, 2.6), $theta_2$)
+
+      for r in (0.4, 0.9, 1.4, 2.0) {
+        circle((cx, cy), radius: (r * 1.3, r * 0.8), stroke: blue.lighten(30%) + 0.6pt)
+      }
+      circle((cx, cy), radius: 0.08, fill: red)
+      content((0.9, 0.3), text(fill: red, size: 8pt)[unique min])
+      content((0, -3.0), text(size: 8pt)[*Quadratic* (ARX): unique global minimum])
+    }),
+    cetz.canvas({
+      import cetz.draw: *
+
+      // Non-quadratic (ARMAX): multiple local minima
+      line((-3, -1.5), (3, -1.5), stroke: gray + 0.5pt, mark: (end: ">"))
+      content((3.3, -1.5), $theta_1$)
+      line((0, -2.5), (0, 2.5), stroke: gray + 0.5pt, mark: (end: ">"))
+      content((0.4, 2.6), $theta_2$)
+
+      // Multiple "basins"
+      for c in ((-1.5, -0.5), (1.2, 0.8), (-0.3, 1.3)) {
+        for r in (0.3, 0.6, 0.9) {
+          circle(c, radius: (r * 0.8, r * 0.5), stroke: orange.lighten(30%) + 0.5pt)
+        }
+        circle(c, radius: 0.06, fill: red)
+      }
+      // Global minimum label
+      content((-1.5, -1.0), text(fill: red, size: 7pt)[global])
+      content((1.2, 0.3), text(fill: red, size: 7pt)[local])
+      content((-0.3, 0.8), text(fill: red, size: 7pt)[local])
+      content((0, -3.0), text(size: 8pt)[*Non-quadratic* (ARMAX): multiple local minima])
+    }),
+  ),
+  caption: [Quadratic cost (ARX) has a unique global minimum found by OLS. Non-quadratic cost (ARMAX) may have multiple local minima, requiring iterative methods.],
+)
+
 === Model validation
 
 During the process we made assumptions that must be verified:
@@ -203,6 +251,38 @@ During the process we made assumptions that must be verified:
   The prediction error $epsilon(t, theta)$ depends on the model family:
   - *ARX*: $epsilon(t, theta) = A(z) y(t) - B(z) u(t-d)$ $arrow.r$ linear in $theta$
   - *ARMAX*: $epsilon(t, theta) = A(z)/C(z) y(t) - B(z)/C(z) u(t-d)$ $arrow.r$ nonlinear in $theta$
+
+  #{
+    import fletcher: diagram, edge, node
+    figure(
+      diagram(
+        spacing: (2em, 2em),
+        node-stroke: 1pt,
+        node-shape: "rect",
+        {
+          // System S
+          node((0, 0))[System $cal(S)$]
+          edge((-1.5, 0), (0, 0), "-|>", label: $u(t)$, label-side: center, label-sep: 0.5em)
+          edge((0, 0), (2, 0), "-|>", label: $y(t)$, label-side: center, label-sep: 0.5em)
+
+          // Model
+          node((0, 1))[Model $hat(cal(M))(theta)$]
+          edge((-1.5, 0), (-1.5, 1), (0, 1), "-|>")
+          edge((0, 1), (1, 1), "-|>", label: $hat(y)(t|t-1, theta)$, label-side: center, label-sep: 0.5em)
+
+          // Difference node
+          node((2, 0.5), stroke: 0.8pt, shape: "circle", width: 1.5em, height: 1.5em)[$-$]
+          edge((2, 0), (2, 0.5), "-|>")
+          edge((1, 1), (2, 1), (2, 0.5), "-|>")
+          edge((2, 0.5), (3.5, 0.5), "-|>", label: $epsilon(t, theta)$, label-side: center, label-sep: 0.5em)
+
+          // Minimization
+          node((3.5, 0.5), stroke: none, shape: "rect")[$min_theta cal(J)_N$]
+        },
+      ),
+      caption: [PEM identification loop: the prediction error $epsilon(t, theta) = y(t) - hat(y)(t|t-1, theta)$ is formed and minimized over $theta$.],
+    )
+  }
 ]
 
 #theorem(title: "Asymptotic PEM properties")[
@@ -536,6 +616,77 @@ $ theta^((i+1)) = theta^((i)) - eta ["gradient"] $
 
 The idea of Newton's method is to approximate $cal(J)_N (theta)$ with a quadratic (Taylor expansion around the current iterate $theta^((i))$), then take the minimum of the paraboloid as the next estimate.
 
+#figure(
+  cetz.canvas({
+    import cetz.draw: *
+
+    let w = 10
+    let h = 5
+
+    // Axes
+    line((-0.5, 0), (w + 0.5, 0), stroke: gray + 0.5pt, mark: (end: ">"))
+    content((w + 0.8, -0.2), $theta$)
+    line((0.5, -0.3), (0.5, h + 0.3), stroke: gray + 0.5pt, mark: (end: ">"))
+
+    // J_N(theta) -- non-quadratic curve with local structure
+    let pts = ()
+    for i in range(0, 81) {
+      let x = i * w / 80
+      let y = (
+        0.3
+          + 0.8 * calc.pow(x - 4, 2) / 10
+          + 0.5 * calc.sin(x * 1.2) * calc.exp(-0.15 * calc.pow(x - 2, 2))
+          + 0.2 * calc.exp(-0.5 * calc.pow(x - 2, 2))
+      )
+      pts.push((x, y))
+    }
+    for i in range(1, pts.len()) {
+      line(pts.at(i - 1), pts.at(i), stroke: black + 1.2pt)
+    }
+    content((w - 0.5, h - 0.8), $cal(J)_N (theta)$)
+
+    // Tangent parabola at theta^(i) = 7
+    let ti = 7.0
+    let yi = (
+      0.3
+        + 0.8 * calc.pow(ti - 4, 2) / 10
+        + 0.5 * calc.sin(ti * 1.2) * calc.exp(-0.15 * calc.pow(ti - 2, 2))
+        + 0.2 * calc.exp(-0.5 * calc.pow(ti - 2, 2))
+    )
+    let parab-pts = ()
+    for i in range(0, 41) {
+      let x = ti - 3 + i * 6 / 40
+      let dx = x - ti
+      let y = yi - 0.8 * dx + 0.25 * dx * dx // tangent parabola
+      if y > 0 and x > 0 and x < w {
+        parab-pts.push((x, y))
+      }
+    }
+    for i in range(1, parab-pts.len()) {
+      line(parab-pts.at(i - 1), parab-pts.at(i), stroke: blue + 1pt)
+    }
+    content((8.5, h - 0.3), text(fill: blue, $nu_i (theta)$))
+
+    // Iterates
+    let theta-i = ti
+    let theta-i1 = 5.4
+    let theta-i2 = 4.5
+
+    line((theta-i, 0), (theta-i, yi), stroke: (dash: "dashed", paint: blue))
+    circle((theta-i, 0), radius: 0.06, fill: blue)
+    content((theta-i, -0.35), text(fill: blue, size: 8pt, $theta^((i))$))
+
+    line((theta-i1, 0), (theta-i1, 0.5), stroke: (dash: "dashed", paint: red))
+    circle((theta-i1, 0), radius: 0.06, fill: red)
+    content((theta-i1, -0.35), text(fill: red, size: 8pt, $theta^((i+1))$))
+
+    line((theta-i2, 0), (theta-i2, 0.35), stroke: (dash: "dashed", paint: orange))
+    circle((theta-i2, 0), radius: 0.06, fill: orange)
+    content((theta-i2, -0.35), text(fill: orange, size: 8pt, $theta^((i+2))$))
+  }),
+  caption: [Newton's method: at each iterate $theta^((i))$, a tangent parabola $nu_i (theta)$ approximates $cal(J)_N (theta)$. The minimum of the parabola gives $theta^((i+1))$, converging toward the local minimum.],
+)
+
 $
   nu (theta) = cal(J)_N (theta^((i))) + pdv(cal(J)_N, theta)|_(theta^((i))) (theta - theta^((i))) + 1 / 2 (theta - theta^((i)))^TT pdv(cal(J)_N, theta, 2)|_(theta^((i))) (theta - theta^((i)))
 $
@@ -582,6 +733,59 @@ Using them, the gradient of the prediction error takes the compact form:
 $
   pdv(epsilon(t|t-1, theta), theta) = vec(alpha(t-1), dots.v, alpha(t-m), beta(t-1), dots.v, beta(t-p+1), gamma(t-1), dots.v, gamma(t-n))
 $
+
+#figure(
+  {
+    import fletcher: diagram, edge, node
+    diagram(
+      spacing: (2em, 1.5em),
+      node-stroke: 1pt,
+      node-shape: "rect",
+      {
+        // Inputs
+        node((-2, -0.5), stroke: none)[$u(t)$]
+        node((-2, 0.5), stroke: none)[$y(t)$]
+        node((-2, 1.5), stroke: none)[$epsilon$]
+
+        // -1/C(z) filter block
+        node((0, 0.5))[$display(-1 / C(z))$]
+        edge((-2, -0.5), (-0.5, -0.5), (0, 0.5), "-|>")
+        edge((-2, 0.5), (0, 0.5), "-|>")
+
+        // epsilon filter
+        node((0, 1.5))[$display(-1 / C(z))$]
+        edge((-2, 1.5), (0, 1.5), "-|>")
+
+        // Auxiliary signals
+        node((2, -0.5), stroke: none)[$alpha(t)$]
+        node((2, 0.5), stroke: none)[$beta(t)$]
+        node((2, 1.5), stroke: none)[$gamma(t)$]
+        edge((0, 0.5), (2, -0.5), "-|>")
+        edge((0, 0.5), (2, 0.5), "-|>")
+        edge((0, 1.5), (2, 1.5), "-|>")
+
+        // Gradient vector
+        node((4, 0.5))[$display(pdv(epsilon, theta)) = vec(alpha(t-1), dots.v, gamma(t-n))$]
+        edge((2, -0.5), (4, 0.5), "-|>")
+        edge((2, 0.5), (4, 0.5), "-|>")
+        edge((2, 1.5), (4, 0.5), "-|>")
+
+        // Update rule
+        node((6, 0.5))[UPDATE \ RULE]
+        edge((4, 0.5), (6, 0.5), "-|>", label: $pdv(epsilon, theta)$, label-side: center, label-sep: 0.8em)
+
+        // theta^(i) input
+        node((6, -0.5), stroke: none)[$theta^((i))$]
+        edge((6, -0.5), (6, 0.5), "-|>")
+
+        // theta^(i+1) output
+        node((8, 0.5), stroke: none)[$theta^((i+1))$]
+        edge((6, 0.5), (8, 0.5), "-|>")
+      },
+    )
+  },
+  caption: [Processing scheme for the Newton / Quasi-Newton update law. The signals $u(t), y(t), epsilon$ are filtered through $-1 slash C(z)$ to produce auxiliary signals $alpha(t), beta(t), gamma(t)$, which form $pdv(epsilon, theta)$ and drive the parameter update.],
+)
 
 === ARMAX PEM details
 

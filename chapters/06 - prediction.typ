@@ -52,6 +52,34 @@
   $hat(y) (t+k|t)$ is the predictor of SSP $y(t)$: an estimate of the future value $y(t+k)$ based on all available observations up to time $t$.
 ]
 
+#figure(
+  {
+    import fletcher: diagram, edge, node
+    diagram(
+      spacing: (1.5em, 1em),
+      node-stroke: 1pt,
+      node-shape: "rect",
+      {
+        // Process y
+        node((-2, 0), [Process $y$])
+        edge("rr", "-|>")
+
+        // Data column
+        node((0, 0), $y(t), y(t-1), y(t-2), dots$)
+        edge("rr", "-|>")
+
+        // Predictor box
+        node((2, 0), [*PREDICTOR*])
+        edge("rr", "-|>")
+
+        // Outputs
+        node((4, 0), stroke: none, $hat(y)(t+1|t) \ hat(y)(t+2|t) \ dots.v \ hat(y)(t+k|t)$)
+      },
+    )
+  },
+  caption: [The predictor takes past observations of the process and produces estimates of future values. $k$ is the *prediction horizon*.],
+)
+
 #definition(title: "Trivial predictor")[
   $hat(y) (t+k|t) = EE[y(t)] = m_y$
 ]

@@ -173,7 +173,8 @@ The procedure is to sweep over increasing model orders $n = 1, 2, dots, n_max$:
     let n_max = 20
     let actual_model_oder = 10
 
-    let points = range(0, n_max).map(x => (x + 3, 20 / (1 + x) + 1))
+    let lambda2 = 1.5 // asymptotic value of J_N
+    let points = range(0, n_max).map(x => (x + 3, 20 / (1 + x) + lambda2))
 
     plot.plot(
       size: (5, 5),
@@ -183,13 +184,17 @@ The procedure is to sweep over increasing model orders $n = 1, 2, dots, n_max$:
       y-max: n_max,
       x-tick-step: 50,
       y-tick-step: 50,
-      y-label: [$J_N (theta)$],
+      y-label: [$overline(cal(J))_N^((n)) (hat(theta))$],
       x-ticks: ((actual_model_oder, [$n_theta$]), 0),
+      y-ticks: ((lambda2, $lambda^2$),),
       {
         plot.add(
           points,
           line: "spline",
         )
+
+        // λ² horizontal asymptote
+        plot.add-hline(lambda2, style: (stroke: (dash: "dashed", paint: gray)))
 
         plot.add-vline(actual_model_oder, style: (stroke: (dash: "dashed")))
         plot.add-fill-between(
@@ -240,6 +245,56 @@ Three criteria for model order selections are
 
   The test is applied to the *normalized* auto-covariance $hat(rho)(tau)$, not $hat(gamma)(tau)$.
 ]
+
+#figure(
+  grid(
+    columns: 2,
+    gutter: 2em,
+    cetz.canvas({
+      import cetz.draw: *
+
+      // Ideal situation
+      let w = 5
+      let h = 3
+      line((-0.3, 0), (w + 0.3, 0), stroke: gray + 0.5pt, mark: (end: ">"))
+      content((w + 0.6, -0.15), text(size: 7pt, [$n$ (order)]))
+      line((0, -0.3), (0, h + 0.3), stroke: gray + 0.5pt, mark: (end: ">"))
+
+      // Model order labels and test results
+      for (i, result) in ((0.8, "KO"), (1.6, "KO"), (2.4, "KO"), (3.2, "OK"), (4.0, "OK")) {
+        let color = if result == "KO" { red } else { green.darken(20%) }
+        content((i, 0.5), text(fill: color, size: 8pt, weight: "bold", result))
+      }
+
+      // Arrow pointing to the best candidate
+      line((3.2, 1.0), (3.2, 0.75), stroke: blue + 1pt, mark: (end: ">"))
+      content((3.2, 1.3), text(fill: blue, size: 7pt)[best candidate])
+
+      content((w / 2, -0.7), text(size: 8pt, weight: "bold")[Ideal situation])
+    }),
+    cetz.canvas({
+      import cetz.draw: *
+
+      // Real situation
+      let w = 5
+      let h = 3
+      line((-0.3, 0), (w + 0.3, 0), stroke: gray + 0.5pt, mark: (end: ">"))
+      content((w + 0.6, -0.15), text(size: 7pt, [$n$ (order)]))
+      line((0, -0.3), (0, h + 0.3), stroke: gray + 0.5pt, mark: (end: ">"))
+
+      // All KO
+      for i in (0.8, 1.6, 2.4, 3.2, 4.0) {
+        content((i, 0.5), text(fill: red, size: 8pt, weight: "bold", "KO"))
+      }
+
+      // Question mark
+      content((w / 2, 1.3), text(fill: orange, size: 16pt, weight: "bold", "?"))
+
+      content((w / 2, -0.7), text(size: 8pt, weight: "bold")[Real situation])
+    }),
+  ),
+  caption: [Ideal: the whiteness test fails (KO) for under-specified orders and passes (OK) starting at the true order. In practice, with finite data the test may keep failing for all tested orders, making the decision less clear-cut.],
+)
 
 ==== Cross-correlation test
 

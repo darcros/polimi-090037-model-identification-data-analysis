@@ -27,6 +27,50 @@ Models can be:
 / black box: derived from historical data + statistical analysis
 / gray box: derived from a mix of historical data (+ analysis) and simplified physical laws
 
+#figure(
+  {
+    import fletcher: diagram, edge, node
+    diagram(
+      spacing: (2.5em, 2.5em),
+      node-stroke: 1pt,
+      node-shape: "rect",
+      {
+        // System
+        node((1, 0))[System]
+
+        // Prior knowledge
+        node((0, -0.3), stroke: none)[ _Prior knowledge_]
+
+        // Data
+        node((2, -0.3), stroke: (paint: red, thickness: 1.5pt))[_Data_]
+
+        // First principles
+        node((0, 1))["First principles"]
+
+        // Identification (highlighted)
+        node((2, 1), stroke: (paint: red, thickness: 1.5pt))[Identification]
+
+        // Model
+        node((1, 2))[Model]
+
+        // Solid edges: primary flows
+        edge((1, 0), (0, 1), "-|>") // System -> First principles
+        edge((1, 0), (2, 1), "-|>") // System -> Identification
+        edge((2, -0.3), (2, 1), "-|>") // Data -> Identification
+        edge((0, 1), (1, 2), "-|>") // First principles -> Model
+        edge((2, 1), (1, 2), "-|>") // Identification -> Model
+
+        // Dashed edges: secondary/prior flows
+        edge((0, -0.3), (0, 1), "-->") // Prior knowledge -> First principles
+        edge((0, -0.3), (2, 1), "-->") // Prior knowledge -> Identification
+        edge((2, -0.3), (0, 1), "-->") // Data -> First principles
+        edge((1, 0), (2, -0.3), "-->") // System -> Data
+      },
+    )
+  },
+  caption: [Two paths to building a model: _first principles_ (white-box, from physical laws + prior knowledge) and _identification_ (black-box, from data). Gray-box approaches combine both. Data and prior knowledge feed into both paths.],
+)
+
 Some challenges in model identification are:
 - *Uncertainty*: #underline[structural] if the physical laws that govern the system are unknown or unavailable and #underline[parametric] if we are oblivious to its parameters.
 - *Complexity and model purpose*: the model must be complex enough to describe the model for the intended use but simple enough that computations and predictions are feasible

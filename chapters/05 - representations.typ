@@ -86,6 +86,33 @@ For each of these possible cases, we can define properties so to define a SSP in
 
 === All-pass filter and spectrum invariance
 
+#figure(
+  {
+    import fletcher: diagram, edge, node
+    diagram(
+      spacing: (2em, 1em),
+      node-stroke: 1pt,
+      node-shape: "rect",
+      {
+        // Input
+        node((-1.5, 0), stroke: none)[$e(t)$\ $lambda^2$\ #text(fill: red, weight: "bold")[WN]]
+        edge((-1.5, 0), (0, 0), "-|>")
+
+        // Transfer function
+        node((0, 0))[$display(frac(1 + c z^(-1), 1 + a z^(-1)))$\ #text(size: 8pt)[$c = 1 slash a$]]
+        edge((0, 0), (1.5, 0), "-|>")
+
+        // Output
+        node((1.5, 0), stroke: none)[$y(t)$\ $c^2 lambda^2$\ #text(fill: red, weight: "bold")[WN]]
+
+        // Label
+        node((3, 0), stroke: none)[#text(fill: red, weight: "bold", size: 12pt)[ALL PASS\ FILTER]]
+      },
+    )
+  },
+  caption: [The all-pass filter with $c = 1/a$ transforms $e(t) tilde WN(0, lambda^2)$ into $y(t) tilde WN(0, c^2 lambda^2)$: the spectrum shape is preserved, only the variance changes.],
+)
+
 #theorem(title: "All-pass filter property")[
   Let $T(z) = 1/q dot (z - q)/(z - 1/q)$ with $|q| > 1$. Then:
   $ T(z) T(z^(-1)) = 1 $

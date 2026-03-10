@@ -5,6 +5,30 @@
 Since there are infinitely many realizations for a SP we cannot simply analyze the signal in the frequency domain.
 So we analyze the covariance function $gamma$ instead.
 
+#figure(
+  grid(
+    columns: 3,
+    align: center + horizon,
+    gutter: 1.5em,
+    [
+      *Covariance function*\
+      time domain ($tau$)\
+      $gamma(tau)$
+    ],
+    [
+      #text(fill: red, weight: "bold", size: 12pt)[Fourier Transform\
+        (Discrete)]\
+      $arrow.l.r$
+    ],
+    [
+      *Spectrum*\
+      frequency domain ($omega$)\
+      $Gamma(omega)$
+    ],
+  ),
+  caption: [The covariance function $gamma(tau)$ and the spectral density $Gamma(omega)$ are a discrete Fourier transform pair.],
+)
+
 #definition(title: "Spectral density of a SSP")[
   The spectral density (or spectrum) of a SSP $y$ is
 
