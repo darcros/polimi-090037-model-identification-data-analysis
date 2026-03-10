@@ -6,7 +6,7 @@
 )
 
 #set text(font: "Libertinus Serif", size: 9pt)
-#set heading(numbering: "1.")
+#set heading(numbering: "1.", outlined: false)
 
 #show heading.where(level: 1): it => block(
   text(fill: rgb("#003366"), weight: "bold", size: 12pt, it),
@@ -85,6 +85,13 @@ $ Gamma_y(omega) = |W(e^(j omega))|^2 Gamma_u(omega) $
 *Inverse Formula (Variance computation):*
 $ gamma_y(0) = 1 / (2pi) integral_(-pi)^pi Gamma_y(omega) dif omega $
 
+*Linearity:*
+- Scalar multiple: if $y = a x$, then $Gamma_y = a^2 Gamma_x$.
+- Uncorrelated sum: if $z = x + y$, $x,y$ uncorr., then $Gamma_z = Gamma_x + Gamma_y$.
+
+*Theorem of the Gain:*
+For a stable $W(z)$: $E[y(t)] = W(1) dot E[u(t)]$. Useful for de-biasing.
+
 = 4. Optimal Prediction (Kolmogorov-Wiener)
 Goal: Predict future values based on past observations.
 
@@ -99,6 +106,13 @@ To design the optimal predictor, the model $y(t) = (C(z))/(A(z)) e(t)$ must be i
 $ hat(y)(t|t-1) = (C(z) - A(z)) / C(z) y(t) $
 - Prediction Error: $epsilon(t|t-1) = y(t) - hat(y)(t|t-1) = e(t)$
 - The variance of the 1-step prediction error is minimal and equals $lambda^2$.
+
+*1-Step ARMA Shortcuts:*
+- From noise: $hat(y)(t|t-1) = (C(z) - A(z))/A(z) e(t)$
+- From data: $hat(y)(t|t-1) = (C(z) - A(z))/C(z) y(t)$
+- Prediction error (whitening filter): $epsilon(t|t-1) = A(z)/C(z) y(t)$
+
+*Multi-step AR(1):* $hat(y)(t+r|t) = a^r y(t)$ — converges to $E[y]$ as $r -> oo$.
 
 *k-Step Predictor ($k >= 2$):*
 Use polynomial long division to expand the transfer function for $k$ steps:
@@ -115,6 +129,20 @@ Find parameters $theta$ and variance $lambda^2$ that best fit the data.
 Minimize the theoretical variance of the 1-step prediction error:
 $ overline(J)(theta) = E[(y(t) - hat(y)(t|t-1, theta))^2] $
 $ theta^* = op("argmin")_theta overline(J)(theta), quad lambda_*^2 = overline(J)(theta^*) $
+
+*Quasi-Newton Update:*
+Approximate Hessian (always PSD):
+$ H approx 2/N sum (partial epsilon)/(partial theta) ((partial epsilon)/(partial theta))^T $
+$ theta^((i+1)) = theta^((i)) - H^(-1) [sum epsilon dot (partial epsilon) / (partial theta)] $
+
+*Auxiliary Signals* (for computing $(partial epsilon)/(partial theta)$):
+$ alpha(t) = -1/C(z) y(t), quad beta(t) = -1/C(z) u(t), quad gamma(t) = -1/C(z) epsilon(t) $
+
+*Four Cases of PEM Convergence:*
+- $cal(S) in cal(M)$, $Delta$ singleton: $hat(theta)_N -> theta^0$ (unique correct solution).
+- $cal(S) in cal(M)$, $Delta$ not singleton: converges to one in $Delta$ (over-parameterization).
+- $cal(S) in.not cal(M)$, $Delta$ singleton: $hat(theta)_N -> theta^*$ (best proxy).
+- $cal(S) in.not cal(M)$, $Delta$ not singleton: no guarantees on which minimum.
 
 *Finite Samples ($N$ samples):*
 $ J_N(theta) = 1 / N sum_(t=1)^N (y(t) - hat(y)(t|t-1, theta))^2 $
@@ -148,6 +176,9 @@ Check if the model captured all systematic information (residuals should be Whit
 - *Jarque-Bera Test:* Checks normality.
   - *Prob(JB) $> 0.05$:* Residuals look normally distributed.
 - *Plots:* Standardized residuals, Q-Q plot (should be a straight line), and Correlogram (ACF of residuals should stay within confidence bounds).
+
+*Train/Validation Split:*
+Partition data into identification (training) and validation sets. Avoids overfitting but wastes data.
 
 == Step 4: Production
 Once the diagnostics confirm the model is adequate, use it to forecast (`results.get_forecast()`). Forecasts for larger horizons will smoothly decay toward the historical mean.

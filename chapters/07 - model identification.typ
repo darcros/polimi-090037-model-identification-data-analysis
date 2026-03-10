@@ -129,7 +129,7 @@ When designing the experiment we need to:
 
 We use a _predictive approach_: a model is considered good if it can accurately predict future values. The key idea is that if we found the "true" model, the prediction error would be white noise, and no further improvement would be possible.
 
-Our ideal objective would be
+Our ideal objective would be to minimize the expected value of the squared 1-step ahead prediction error:
 $ cal(J)(theta) = EE[(y(t+1) - hat(y)(t+1|t, theta))^2] $
 but that is not computable, because we only have *one* realization.
 
@@ -256,28 +256,28 @@ During the process we made assumptions that must be verified:
     import fletcher: diagram, edge, node
     figure(
       diagram(
-        spacing: (2em, 2em),
+        spacing: (2.5em, 2.5em),
         node-stroke: 1pt,
         node-shape: "rect",
         {
           // System S
           node((0, 0))[System $cal(S)$]
-          edge((-1.5, 0), (0, 0), "-|>", label: $u(t)$, label-side: center, label-sep: 0.5em)
-          edge((0, 0), (2, 0), "-|>", label: $y(t)$, label-side: center, label-sep: 0.5em)
+          edge((-2, 0), (0, 0), "-|>", label: $u(t)$, label-side: center, label-sep: 0.5em)
+          edge((0, 0), (2.5, 0), "-|>", label: $y(t)$, label-side: center, label-sep: 0.5em)
 
           // Model
-          node((0, 1))[Model $hat(cal(M))(theta)$]
-          edge((-1.5, 0), (-1.5, 1), (0, 1), "-|>")
-          edge((0, 1), (1, 1), "-|>", label: $hat(y)(t|t-1, theta)$, label-side: center, label-sep: 0.5em)
+          node((0, 1.5), width: 5em)[Model $hat(cal(M))(theta)$]
+          edge((-2, 0), (-2, 1.5), (0, 1.5), "-|>")
+          edge((0, 1.5), (2, 1.5), "-|>", label: $hat(y)(t|t-1, theta)$, label-side: center, label-sep: 0.5em)
 
           // Difference node
-          node((2, 0.5), stroke: 0.8pt, shape: "circle", width: 1.5em, height: 1.5em)[$-$]
-          edge((2, 0), (2, 0.5), "-|>")
-          edge((1, 1), (2, 1), (2, 0.5), "-|>")
-          edge((2, 0.5), (3.5, 0.5), "-|>", label: $epsilon(t, theta)$, label-side: center, label-sep: 0.5em)
+          node((2.5, 0.75), stroke: 0.8pt, shape: "circle", width: 1.5em, height: 1.5em)[$-$]
+          edge((2.5, 0), (2.5, 0.75), "-|>")
+          edge((2, 1.5), (2.5, 1.5), (2.5, 0.75), "-|>")
+          edge((2.5, 0.75), (4.5, 0.75), "-|>", label: $epsilon(t, theta)$, label-side: center, label-sep: 0.5em)
 
           // Minimization
-          node((3.5, 0.5), stroke: none, shape: "rect")[$min_theta cal(J)_N$]
+          node((4.5, 0.75), stroke: none)[$min_theta cal(J)_N$]
         },
       ),
       caption: [PEM identification loop: the prediction error $epsilon(t, theta) = y(t) - hat(y)(t|t-1, theta)$ is formed and minimized over $theta$.],
@@ -289,7 +289,7 @@ During the process we made assumptions that must be verified:
   Under standard assumptions (stationary data, persistent excitation, true system in the model class):
 
   As $N -> infinity$:
-  $ hat(theta)_N ->^p theta^* $
+  $ hat(theta)_N ->_(N -> infinity) theta^* $ in probability
   where $theta^*$ minimizes the theoretical (expected) cost $overline(cal(J))(theta) = EE[epsilon(t, theta)^2]$.
 
   If the true system belongs to the model class, then $theta^* = theta_0$ (true parameters).
@@ -627,6 +627,7 @@ The idea of Newton's method is to approximate $cal(J)_N (theta)$ with a quadrati
     line((-0.5, 0), (w + 0.5, 0), stroke: gray + 0.5pt, mark: (end: ">"))
     content((w + 0.8, -0.2), $theta$)
     line((0.5, -0.3), (0.5, h + 0.3), stroke: gray + 0.5pt, mark: (end: ">"))
+    content((0.2, h + 0.4), $cal(J)_N$)
 
     // J_N(theta) -- non-quadratic curve with local structure
     let pts = ()
@@ -645,54 +646,76 @@ The idea of Newton's method is to approximate $cal(J)_N (theta)$ with a quadrati
     }
     content((w - 0.5, h - 0.8), $cal(J)_N (theta)$)
 
-    // Tangent parabola at theta^(i) = 7
-    let ti = 7.0
-    let yi = (
-      0.3
-        + 0.8 * calc.pow(ti - 4, 2) / 10
-        + 0.5 * calc.sin(ti * 1.2) * calc.exp(-0.15 * calc.pow(ti - 2, 2))
-        + 0.2 * calc.exp(-0.5 * calc.pow(ti - 2, 2))
-    )
-    let parab-pts = ()
-    for i in range(0, 41) {
-      let x = ti - 3 + i * 6 / 40
-      let dx = x - ti
-      let y = yi - 0.8 * dx + 0.25 * dx * dx // tangent parabola
-      if y > 0 and x > 0 and x < w {
-        parab-pts.push((x, y))
+    // Iterates with better parabolas
+    let iterates = ((7.0, blue, $theta^((i))$), (5.4, red, $theta^((i+1))$), (4.5, orange, $theta^((i+2))$))
+
+    for idx in range(0, iterates.len()) {
+      let (theta_i, col, label) = iterates.at(idx)
+      let yi = (
+        0.3
+          + 0.8 * calc.pow(theta_i - 4, 2) / 10
+          + 0.5 * calc.sin(theta_i * 1.2) * calc.exp(-0.15 * calc.pow(theta_i - 2, 2))
+          + 0.2 * calc.exp(-0.5 * calc.pow(theta_i - 2, 2))
+      )
+
+      // Tangent parabola: nu(theta) = J(theta_i) + grad*(theta-theta_i) + 0.5*hess*(theta-theta_i)^2
+      // Use realistic curvature (hessian ~ 0.15)
+      let parab_pts = ()
+      for j in range(0, 51) {
+        let x = theta_i - 3.5 + j * 7 / 50
+        let dx = x - theta_i
+        let y = yi - 0.6 * dx + 0.15 * dx * dx
+        parab_pts.push((x, y))
+      }
+      if parab_pts.len() > 1 {
+        for j in range(1, parab_pts.len()) {
+          line(parab_pts.at(j - 1), parab_pts.at(j), stroke: col.lighten(20%) + 1.2pt)
+        }
+      }
+
+      // Vertical line and marker at current iterate
+      line((theta_i, 0), (theta_i, yi), stroke: (dash: "dashed", paint: col, thickness: 0.8pt))
+      circle((theta_i, yi), radius: 0.12, fill: col)
+
+      // Arrow showing Newton descent direction (toward next iterate)
+      if idx < iterates.len() - 1 {
+        let next_theta = iterates.at(idx + 1).at(0)
+        let next_col = iterates.at(idx + 1).at(1)
+        // Point on current parabola at next_theta
+        let dx_next = next_theta - theta_i
+        let y_on_parab = yi - 0.6 * dx_next + 0.15 * dx_next * dx_next
+
+        // Draw thick arrow showing descent
+        line(
+          (theta_i, yi),
+          (next_theta, y_on_parab),
+          stroke: (paint: col, thickness: 2.5pt),
+          mark: (end: ">", fill: col, scale: 1.5),
+        )
+
+        // Label the arrow with update rule
+        let mid_x = (theta_i + next_theta) / 2
+        let mid_y = (yi + y_on_parab) / 2
+        content((mid_x + 0.3, mid_y + 0.4), text(fill: col, size: 7pt)[descent])
       }
     }
-    for i in range(1, parab-pts.len()) {
-      line(parab-pts.at(i - 1), parab-pts.at(i), stroke: blue + 1pt)
-    }
-    content((8.5, h - 0.3), text(fill: blue, $nu_i (theta)$))
 
-    // Iterates
-    let theta-i = ti
-    let theta-i1 = 5.4
-    let theta-i2 = 4.5
-
-    line((theta-i, 0), (theta-i, yi), stroke: (dash: "dashed", paint: blue))
-    circle((theta-i, 0), radius: 0.06, fill: blue)
-    content((theta-i, -0.35), text(fill: blue, size: 8pt, $theta^((i))$))
-
-    line((theta-i1, 0), (theta-i1, 0.5), stroke: (dash: "dashed", paint: red))
-    circle((theta-i1, 0), radius: 0.06, fill: red)
-    content((theta-i1, -0.35), text(fill: red, size: 8pt, $theta^((i+1))$))
-
-    line((theta-i2, 0), (theta-i2, 0.35), stroke: (dash: "dashed", paint: orange))
-    circle((theta-i2, 0), radius: 0.06, fill: orange)
-    content((theta-i2, -0.35), text(fill: orange, size: 8pt, $theta^((i+2))$))
+    content((7.0, -0.5), text(fill: blue, size: 9pt, weight: "bold", $theta^((i))$))
+    content((5.4, -0.5), text(fill: red, size: 9pt, weight: "bold", $theta^((i+1))$))
+    content((4.5, -0.5), text(fill: orange, size: 9pt, weight: "bold", $theta^((i+2))$))
   }),
-  caption: [Newton's method: at each iterate $theta^((i))$, a tangent parabola $nu_i (theta)$ approximates $cal(J)_N (theta)$. The minimum of the parabola gives $theta^((i+1))$, converging toward the local minimum.],
+  caption: [Newton's method: at each iterate $theta^((i))$, the tangent parabola $nu(theta)$ (colored) approximates $cal(J)_N(theta)$ locally. Thick colored arrows show the descent direction toward the next iterate by minimizing the paraboloid.],
 )
 
 $
-  nu (theta) = cal(J)_N (theta^((i))) + pdv(cal(J)_N, theta)|_(theta^((i))) (theta - theta^((i))) + 1 / 2 (theta - theta^((i)))^TT pdv(cal(J)_N, theta, 2)|_(theta^((i))) (theta - theta^((i)))
+  text(fill: #blue, nu (theta)) = text(fill: #blue, cal(J)_N (theta^((i)))) + text(fill: #blue, pdv(cal(J)_N, theta)|_(theta^((i)))) (theta - text(fill: #blue, theta^((i)))) \
+  quad quad quad quad + text(fill: #blue, 1 / 2) (theta - text(fill: #blue, theta^((i))))^TT text(fill: #blue, pdv(cal(J)_N, theta, 2)|_(theta^((i)))) (theta - text(fill: #blue, theta^((i))))
 $
 
 Setting $pdv(nu, theta) = 0$ gives the update rule:
-$ theta^((i+1)) = theta^((i)) - [pdv(cal(J)_N, theta, 2)|_(theta^((i)))]^(-1) pdv(cal(J)_N, theta)|_(theta^((i))) $
+$
+  text(fill: #red, theta^((i+1))) = text(fill: #blue, theta^((i))) - text(fill: #blue, [pdv(cal(J)_N, theta, 2)|_(theta^((i)))]^(-1)) text(fill: #blue, pdv(cal(J)_N, theta)|_(theta^((i))))
+$
 
 The *gradient* of the cost function is:
 $ pdv(cal(J)_N (theta), theta) = 2 / N sum_(t=1)^N epsilon(t|t-1, theta) dot pdv(epsilon(t|t-1, theta), theta) $

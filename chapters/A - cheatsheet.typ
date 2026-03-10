@@ -7,7 +7,7 @@
 #set text(font: "Libertinus Serif", size: 9pt)
 #set par(leading: 0.5em, spacing: 0.65em)
 #set block(spacing: 0.65em)
-#set heading(numbering: none)
+#set heading(numbering: none, outlined: false)
 #set enum(indent: 0pt, spacing: 0.45em)
 #set list(indent: 0pt, spacing: 0.45em)
 
@@ -157,6 +157,16 @@
     [*Zeros near unit disk*], [Spectrum is low (is zero on the disk)],
   )
 
+  === Linearity of the Spectrum
+  #table(
+    columns: (auto, 1fr),
+    [*Scalar multiple*], [If $y = a x$: $Gamma_y = a^2 Gamma_x$],
+    [*Uncorrelated sum*], [$z = x + y$, $x,y$ uncorr.: $Gamma_z = Gamma_x + Gamma_y$],
+    [*Combination*], [$v = a x - b y$, uncorr.: $Gamma_v = a^2 Gamma_x + b^2 Gamma_y$],
+  )
+
+  #bb[Theorem of the gain:] $EE[y(t)] = W(1) dot EE[u(t)]$ (holds even outside canonical form).
+
   #colbreak()
   == Canonical Representation
 
@@ -215,6 +225,16 @@
     [MA(1)], [$c/(1+c z^(-1)) y(t)$], [$lambda^2$],
   )
 
+  === 1-step ARMA shortcuts
+  #table(
+    columns: (auto, 1fr),
+    [*From noise*], [$hat(y)(t|t-1) = (C(z) - A(z)) / A(z) e(t)$],
+    [*From data*], [$hat(y)(t|t-1) = (C(z) - A(z)) / C(z) y(t)$],
+    [*Pred.\ error*], [$epsilon(t|t-1) = A(z)/C(z) y(t)$ (whitening filter)],
+  )
+
+  #bb[Multi-step AR(1):] $hat(y)(t+r|t) = a^r y(t)$ → converges to $EE[y]$ as $r → oo$.
+
   === Non-zero mean
   $ hat(y)(t+k|t) = F(z)/C(z) y(t) + (1 - F(1)/C(1)) m_y $
 
@@ -272,10 +292,35 @@
     [Single sinusoid at $omega_0$], [$2$ only],
   )
 
+  === Quasi-Newton (PEM iteration)
+
+  #bb[Gradient:] $pdv(cal(J)_N, theta) = 2/N sum epsilon(t) dot pdv(epsilon(t), theta)$
+
+  #bb[Approx.\ Hessian] (always PSD):
+  $ pdv(cal(J)_N, theta, 2) approx 2/N sum pdv(epsilon, theta) (pdv(epsilon, theta))^TT $
+
+  #bb[Update rule:]
+  $ theta^((i+1)) = theta^((i)) - [sum pdv(epsilon, theta) (pdv(epsilon, theta))^TT]^(-1) [sum epsilon dot pdv(epsilon, theta)] $
+
+  #bb[Auxiliary signals] ($theta = (a_i, b_l, c_j)^TT$):
+  $ alpha(t) = -1/C(z) y(t), quad beta(t) = -1/C(z) u(t), quad gamma(t) = -1/C(z) epsilon(t) $
+
   == Asymptotic Analysis (Infinite Samples)
   To identify the optimal parameters $theta^*$ by minimizing the theoretical prediction error variance $bar(J) = EE[epsilon(t|t-1)^2]$ for a family model $cal(M)$:
   $ epsilon(t|t-1) = y(t) - hat(y)(t|t-1) = A_m(z)/C_m(z) y(t) $
   Find $theta^* = argmin_theta bar(J)$ and $lambda^2_* = bar(J)(theta^*)$.
+
+  === Four cases of PEM convergence
+  #table(
+    columns: (auto, 1fr, 1fr),
+    table.header([], [$Delta$ singleton], [$Delta$ not singleton]),
+    [$cal(S) in cal(M)$],
+    [$hat(theta)_N -> theta^0$ (unique)],
+    [$hat(theta)_N ->$ one of $Delta$ (over-param.)],
+    [$cal(S) in.not cal(M)$],
+    [$hat(theta)_N -> theta^*$ (best proxy)],
+    [No guarantee (one of best proxies)],
+  )
 
 
   == Model Validation
@@ -309,6 +354,9 @@
   )
 
   MDL penalizes more → simpler models. #h(1fr) Choose model with *lowest* criterion value.
+
+  === Train/validation split
+  Partition data into *identification* (training) and *validation* sets. Avoids overfitting but wastes data; fewer training samples → less accurate model.
 
 
   == Time Series Analysis — COR/PARCOR

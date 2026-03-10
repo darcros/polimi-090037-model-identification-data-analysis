@@ -87,7 +87,7 @@ For each of these possible cases, we can define properties so to define a SSP in
 === All-pass filter and spectrum invariance
 
 #figure(
-  {
+  rect(stroke: 0.5pt, inset: 0.5cm, {
     import fletcher: diagram, edge, node
     diagram(
       spacing: (2em, 1em),
@@ -109,7 +109,7 @@ For each of these possible cases, we can define properties so to define a SSP in
         node((3, 0), stroke: none)[#text(fill: red, weight: "bold", size: 12pt)[ALL PASS\ FILTER]]
       },
     )
-  },
+  }),
   caption: [The all-pass filter with $c = 1/a$ transforms $e(t) tilde WN(0, lambda^2)$ into $y(t) tilde WN(0, c^2 lambda^2)$: the spectrum shape is preserved, only the variance changes.],
 )
 

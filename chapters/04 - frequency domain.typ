@@ -6,25 +6,28 @@ Since there are infinitely many realizations for a SP we cannot simply analyze t
 So we analyze the covariance function $gamma$ instead.
 
 #figure(
-  grid(
-    columns: 3,
-    align: center + horizon,
-    gutter: 1.5em,
-    [
-      *Covariance function*\
-      time domain ($tau$)\
-      $gamma(tau)$
-    ],
-    [
-      #text(fill: red, weight: "bold", size: 12pt)[Fourier Transform\
-        (Discrete)]\
-      $arrow.l.r$
-    ],
-    [
-      *Spectrum*\
-      frequency domain ($omega$)\
-      $Gamma(omega)$
-    ],
+  rect(
+    stroke: 0.5pt,
+    grid(
+      columns: 3,
+      align: center + horizon,
+      gutter: 1.5em,
+      [
+        *Covariance function*\
+        time domain ($tau$)\
+        $gamma(tau)$
+      ],
+      [
+        #text(fill: red)[Fourier Transform\
+          (Discrete)]\
+        $arrow.double.l.r$
+      ],
+      [
+        *Spectrum*\
+        frequency domain ($omega$)\
+        $Gamma(omega)$
+      ],
+    ),
   ),
   caption: [The covariance function $gamma(tau)$ and the spectral density $Gamma(omega)$ are a discrete Fourier transform pair.],
 )
@@ -124,7 +127,7 @@ So we analyze the covariance function $gamma$ instead.
   - $W(z)$ an asymptotically stable filter
 
   Then we can reconduce the spectral density of the output to the spectral density of the input.
-  $ Gamma_y(omega) = |W(e^(j omega))|^2 Gamma_v(omega) $
+  $ Gamma_y(omega) = |W(e^(j omega))|^2 Gamma_v(omega) = W(e^(j omega)) W(e^(-j omega)) Gamma_v(omega) $
 ]
 #remark(title: "Remark: Gamma function of a white noise")[
   From the definition of *inverse DFT*, if $u(t)$ is a *white noise* process, the only non-zero term for $gamma_y (tau)$ is at $tau = 0$. Therefore, the spectral density of a white noise process is constant.
