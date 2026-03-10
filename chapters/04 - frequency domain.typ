@@ -64,6 +64,23 @@ So we analyze the covariance function $gamma$ instead.
   Note the exponent of $e$, it is *positive*.
 ]
 
+#properties(title: "Linearity of the spectrum")[
+  / Scalar multiple: If $y(t) = a x(t)$, then $ Gamma_y (omega) = a^2 Gamma_x (omega) $
+  / Sum of uncorrelated processes: If $z(t) = x(t) + y(t)$ and $x, y$ are uncorrelated, then $ Gamma_z (omega) = Gamma_x (omega) + Gamma_y (omega) $
+]
+
+#example(title: "Linear combination of uncorrelated processes")[
+  If $v(t) = a x(t) - b y(t)$ with $x(t)$ and $y(t)$ uncorrelated:
+  $ Gamma_v (omega) = a^2 Gamma_x (omega) + b^2 Gamma_y (omega) $
+]
+
+#note-box(title: "Euler formula recall")[
+  Useful identities for spectrum computation:
+  - $e^(j omega) = cos omega + j sin omega$
+  - $e^(-j omega) = cos omega - j sin omega$
+  - $e^(-j omega) + e^(j omega) = 2 cos(omega)$
+]
+
 #theorem(title: "spectral factorization")[
   #{
     import fletcher: diagram, edge, node
@@ -176,6 +193,24 @@ So we analyze the covariance function $gamma$ instead.
     }),
     caption: [Graphical method: $Gamma_y(omega) prop |overline(a) \/ overline(b)|^2$ where $overline(a)$ and $overline(b)$ are distances from the zero and pole to $e^(j omega)$ on the unit circle.],
   )
+]
+
+== Final value theorem
+
+#theorem(title: "Theorem of the gain (final value theorem)")[
+  For a stable transfer function $W(z)$:
+  $ EE[y(t)] = W(1) dot EE[u(t)] $
+
+  This holds even if $W(z)$ is not in canonical form.
+]
+
+#remark(title: "De-biasing procedure")[
+  The final value theorem is useful when dealing with non-zero-mean processes:
+
+  + Find the mean using the gain theorem: $EE[y(t)] = W(1) dot mu = overline(y)$
+  + Define de-biased processes:
+    $ tilde(y)(t) = y(t) - overline(y), quad tilde(e)(t) = e(t) - mu $
+  + Compute covariance etc. on the de-biased process: $gamma_(tilde(y))(tau) = gamma_y (tau) quad forall tau$
 ]
 
 == Complex spectrum and input-output relations

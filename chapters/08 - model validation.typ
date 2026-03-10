@@ -84,6 +84,73 @@ $hat(Theta)_N = argmin_theta J_N (theta)$ with $J_N (theta) = 1/N sum_{i=1}^N (y
   If $Delta$ is a singleton (the true system belongs to the model class with a unique parameterization), convergence is to a single point. If $cal(S) in.not cal(M)_theta$, the estimate converges to the *best approximation* within the class.
 ]
 
+#remark(title: "Convergence of the minimum")[
+  Furthermore:
+  $ min{cal(J)_N (theta)} -->_(N -> infinity) min{overline(cal(J))(theta)} $
+  The minimum of the empirical cost converges to the minimum of the theoretical cost.
+]
+
+=== PEM converges to the true system
+
+#theorem(title: "PEM convergence when S ∈ M(θ)")[
+  If the true system $cal(S) in cal(M)(theta)$ (i.e., there exists $theta^0$ such that $cal(M)(theta^0) = cal(S)$), then PEM guarantees:
+  $ hat(theta)_N -->_(N -> infinity) theta^0 $
+]
+
+#proof[
+  Decompose the prediction error at a generic $theta$:
+  $
+    epsilon(t|t-1, theta) & = y(t) - hat(y)(t|t-1, theta) \
+                          & = y(t) - hat(y)(t|t-1, theta^0) + hat(y)(t|t-1, theta^0) - hat(y)(t|t-1, theta) \
+                          & = e(t) + [hat(y)(t|t-1, theta^0) - hat(y)(t|t-1, theta)]
+  $
+
+  Computing the expected squared error:
+  $
+    EE[epsilon(t|t-1, theta)^2] &= EE[(e(t) + hat(y)(t|t-1, theta^0) - hat(y)(t|t-1, theta))^2] \
+    &= underbrace(EE[e(t)^2], lambda^2) + EE[(hat(y)(t|t-1, theta^0) - hat(y)(t|t-1, theta))^2] + underbrace(2 EE[e(t)(hat(y)(t|t-1, theta^0) - hat(y)(t|t-1, theta))], 0)
+  $
+
+  The cross-term vanishes because $e(t)$ is uncorrelated with quantities depending on past data. Thus:
+  $ EE[epsilon(t|t-1, theta)^2] = lambda^2 + EE[(hat(y)(t|t-1, theta^0) - hat(y)(t|t-1, theta))^2] >= lambda^2 $
+
+  Equality holds iff $theta = theta^0$. Since PEM converges to the global minimum of $overline(cal(J))(theta) = EE[epsilon^2]$, we get $hat(theta)_N -> theta^0$.
+]
+
+#remark[
+  This theorem is very significant: if the true system lies within the model set, PEM will converge asymptotically (with enough data) to exactly that system.
+]
+
+=== Four cases of PEM convergence
+
+#figure(
+  table(
+    columns: 3,
+    align: (center, left, left),
+    table.header([], [$Delta$ singleton], [$Delta$ not singleton]),
+    [$cal(S) in cal(M)(theta)$],
+    [
+      $hat(theta)_N -> theta^0$\
+      Unique correct solution.
+    ],
+    [
+      $hat(theta)_N$ converges to one value in $Delta$.\
+      Multiple models equally represent $cal(S)$ (over-parameterization).
+    ],
+
+    [$cal(S) in.not cal(M)(theta)$],
+    [
+      $hat(theta)_N -> theta^*$ (best proxy).\
+      Model class insufficient but unique best approximation.
+    ],
+    [
+      No guarantees. $hat(theta)_N$ converges to one of the best proxies.\
+      Model class too limited and/or data not representative enough.
+    ],
+  ),
+  caption: [Summary of PEM convergence cases depending on whether the true system belongs to the model class and whether the set of global minima $Delta$ is a singleton.],
+)
+
 == Model order selection
 Let's find the best dimension of $cal(M)_theta$ such that our system $cal(S) in cal(M)_theta$.
 
@@ -193,6 +260,14 @@ Three criteria for model order selections are
   The Anderson test (auto-correlation of residuals) checks the *noise model* $C(z)/A(z)$.
   The cross-correlation test checks the *input-output model* $B(z)/A(z)$.
   Both tests should be performed for input-output models.
+]
+
+==== Simple cross-validation (train/validation split)
+
+The simplest form of cross-validation: partition the dataset into an *identification set* (training) used to build the model and a *validation set* used to assess its performance.
+
+#remark[
+  The validation data is "reserved" and not used during model building. This leads to potential *data wastage* --- with less training data, the model may be less accurate, and with less validation data, the performance estimate is noisier.
 ]
 
 ==== Cross validation with k fold

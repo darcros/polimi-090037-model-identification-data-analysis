@@ -532,6 +532,57 @@ $ theta^((i+1)) = theta^((i)) - ["hessian"]^(-1) dot "gradient" $
 - *Gradient descent*: to have a scalar and fixed learning rate. Fastest and simplest method.
 $ theta^((i+1)) = theta^((i)) - eta ["gradient"] $
 
+=== Quasi-Newton derivation
+
+The idea of Newton's method is to approximate $cal(J)_N (theta)$ with a quadratic (Taylor expansion around the current iterate $theta^((i))$), then take the minimum of the paraboloid as the next estimate.
+
+$
+  nu (theta) = cal(J)_N (theta^((i))) + pdv(cal(J)_N, theta)|_(theta^((i))) (theta - theta^((i))) + 1 / 2 (theta - theta^((i)))^TT pdv(cal(J)_N, theta, 2)|_(theta^((i))) (theta - theta^((i)))
+$
+
+Setting $pdv(nu, theta) = 0$ gives the update rule:
+$ theta^((i+1)) = theta^((i)) - [pdv(cal(J)_N, theta, 2)|_(theta^((i)))]^(-1) pdv(cal(J)_N, theta)|_(theta^((i))) $
+
+The *gradient* of the cost function is:
+$ pdv(cal(J)_N (theta), theta) = 2 / N sum_(t=1)^N epsilon(t|t-1, theta) dot pdv(epsilon(t|t-1, theta), theta) $
+
+The *Hessian* is (applying the product rule to the gradient):
+$
+  pdv(cal(J)_N (theta), theta, 2) = 2 / N sum_(t=1)^N pdv(epsilon, theta) (pdv(epsilon, theta))^TT + 2 / N sum_(t=1)^N epsilon(t) pdv(epsilon, theta, 2)
+$
+
+#remark(title: "Quasi-Newton approximation")[
+  The second-order term involving $pdv(epsilon, theta, 2)$ is neglected:
+  $ pdv(cal(J)_N, theta, 2) approx 2 / N sum_(t=1)^N pdv(epsilon, theta) (pdv(epsilon, theta))^TT $
+
+  This *approximate Hessian* is always positive semi-definite (it is a sum of outer products), which guarantees the update direction points toward a minimum --- we always get a "bowl-shaped" paraboloid.
+]
+
+The Quasi-Newton update rule then becomes:
+$
+  theta^((i+1)) = theta^((i)) - [sum_(t=1)^N pdv(epsilon(t), theta) (pdv(epsilon(t), theta))^TT]^(-1) [sum_(t=1)^N epsilon(t) pdv(epsilon(t), theta)]
+$
+
+=== Computing $pdv(epsilon, theta)$ with auxiliary signals
+
+The gradient $pdv(epsilon(t|t-1, theta), theta)$ is a vector of partial derivatives with respect to each parameter in $theta = mat(a_1, dots, a_m, b_0, dots, b_(p-1), c_1, dots, c_n)^TT$.
+
+Three *auxiliary signals* are defined to simplify the computation:
+$
+  alpha(t) = -1 / C(z) y(t), quad
+  beta(t) = -1 / C(z) u(t), quad
+  gamma(t) = -1 / C(z) epsilon(t|t-1, theta)
+$
+
+#remark[
+  These are all time signals: the derivative of a signal with respect to a parameter is itself a signal. Note that $gamma(t)$ depends on the current value of $theta$.
+]
+
+Using them, the gradient of the prediction error takes the compact form:
+$
+  pdv(epsilon(t|t-1, theta), theta) = vec(alpha(t-1), dots.v, alpha(t-m), beta(t-1), dots.v, beta(t-p+1), gamma(t-1), dots.v, gamma(t-n))
+$
+
 === ARMAX PEM details
 
 #definition(title: "Pseudo-regressor for ARMAX")[
@@ -587,5 +638,25 @@ $ theta^((i+1)) = theta^((i)) - eta ["gradient"] $
   If the true system is ARMAX but we fit an ARX model:
   $ y(t) = B(z)/A(z) u(t-d) + C(z)/A(z) e(t) $
   and we use $hat(y)(t|t-1) = phi(t)^TT theta$ (ARX predictor), the LS estimate will be *biased* because the noise term $C(z)/A(z) e(t)$ is not white and correlates with the regressor.
+]
+
+== Dummy identification exercise
+
+#example(title: "Identifying an MA(1) process")[
+  Suppose the true system is:
+  $ y(t) = e(t) + 1 / 2 e(t-1), quad e(t) tilde WN(0, 1) $
+
+  and we want to identify it with a model $cal(M)$:
+  $ y(t) = eta(t) + b eta(t-1), quad eta(t) tilde WN(0, lambda^2) $
+
+  The prediction error for 1-step prediction is:
+  $ epsilon(t|t-1) = A(z) / C(z) y(t) = 1 / (1 + b z^(-1)) y(t) = (1 + 1 / 2 z^(-1)) / (1 + b z^(-1)) e(t) $
+
+  For $epsilon(t)$ to be white noise (equal to $e(t)$ with $lambda^(2*) = 1$), we need the transfer function to simplify to 1, which requires:
+  $ b^* = 1 / 2 $
+
+  With $b^* = 1/2$, the prediction error becomes $epsilon(t) = e(t) tilde WN(0, 1)$, confirming the model matches the true system.
+
+  The key insight is to recognize this by inspection: the model structure directly matches the system --- no optimization is needed.
 ]
 

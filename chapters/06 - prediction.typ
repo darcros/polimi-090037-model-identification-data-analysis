@@ -495,6 +495,27 @@ $ "var"[e(t)] <= "var"[epsilon(t+k|t)] < "var"[y(t)] $
   *Prediction error variance:* $"Var"[epsilon(t+1|t)] = lambda^2$ (just the noise variance).
 ]
 
+#example(title: "Multi-step prediction for AR(1)")[
+  For $y(t) = a y(t-1) + e(t)$, $|a| < 1$:
+
+  *2-step predictor:*
+  $ hat(y)(t|t-2) = a^2 y(t-2) $
+
+  *General $r$-step predictor:*
+  $ hat(y)(t+r|t) = a^r y(t) $
+
+  As $r -> infinity$, $a^r -> 0$ and the predictor converges to the mean $EE[y(t)] = 0$. The prediction becomes less and less informative.
+]
+
+#example(title: "1-step prediction for AR(n)")[
+  For a general $AR(n)$: $y(t) = a_1 y(t-1) + a_2 y(t-2) + dots + a_n y(t-n) + e(t)$.
+
+  The 1-step ahead predictor is always:
+  $ hat(y)(t|t-1) = a_1 y(t-1) + a_2 y(t-2) + dots + a_n y(t-n) $
+
+  This is simply the deterministic part of the AR difference equation --- the noise $e(t)$ is the unpredictable component.
+]
+
 #example(title: "1-step prediction for MA(1)")[
   Let $y(t) = e(t) + c e(t-1)$, $e(t) tilde WN(0, lambda^2)$.
 
@@ -511,6 +532,27 @@ $ "var"[e(t)] <= "var"[epsilon(t+k|t)] < "var"[y(t)] $
   The prediction formulas assume the process is in *canonical form*. If the representation is not canonical (e.g., $C(z)$ has roots outside the unit circle), the predictor may be *unstable*.
 
   Always convert to canonical form before computing the predictor.
+
+  Non-canonical form $arrow.r$ unstable transfer function $arrow.r$ non-stationary predictor $arrow.r$ divergent predictor.
+  The easiest workaround is to multiply by the All-Pass Filter (APF) to convert to canonical form.
+]
+
+== General 1-step predictor
+
+For the 1-step ahead predictor ($k=1$), the Diophantine equation always yields $E(z) = 1$, $F(z) = C(z) - A(z)$. This simplifies the predictor formulas.
+
+#properties(title: "1-step predictor shortcuts (ARMA)")[
+  *From noise:*
+  $ hat(y)(t|t-1) = (C(z) - A(z)) / A(z) e(t) $
+
+  *From data:*
+  $ hat(y)(t|t-1) = (C(z) - A(z)) / C(z) y(t) $
+]
+
+#properties(title: "1-step prediction error")[
+  $ epsilon(t|t-1) = y(t) - hat(y)(t|t-1) = y(t) - (C(z) - A(z)) / C(z) y(t) = A(z) / C(z) y(t) $
+
+  This is the *whitening filter* applied to $y(t)$. Since $E(z) = 1$, the 1-step prediction error is always $epsilon(t|t-1) = e(t)$ for the optimal model.
 ]
 
 == Prediction for ARMAX models
@@ -533,6 +575,26 @@ $ "var"[e(t)] <= "var"[epsilon(t+k|t)] < "var"[y(t)] $
   + A *feedforward* term from known inputs: $(E(z) B(z))/C(z) z^(-k_0) u(t+k)$
 
   Note: future values of $u(t)$ are assumed known (since $u$ is the controlled input).
+]
+
+#proof(title: "Derivation of the ARMAX predictor")[
+  Starting from the ARMAX equation with $u(t)$ considered deterministic (known):
+  $ y(t) = C(z) / A(z) e(t) + B(z) / A(z) u(t-d) $
+
+  From the long division $C(z) / A(z) = E(z) + (z^(-k) F(z)) / A(z)$, we can write:
+  $ A(z) = (C(z) - z^(-k) F(z)) / E(z) $
+
+  Substituting into the ARMAX equation and multiplying both sides by $A(z)$:
+  $ (C(z) - z^(-k) F(z)) / E(z) y(t) = C(z) e(t) + B(z) u(t-d) $
+
+  Multiply by $E(z)$:
+  $ C(z) y(t) = z^(-k) F(z) y(t) + C(z) E(z) e(t) + B(z) E(z) u(t-d) $
+
+  Divide by $C(z)$:
+  $ y(t) = (z^(-k) F(z)) / C(z) y(t) + E(z) e(t) + (B(z) E(z)) / C(z) u(t-d) $
+
+  The term $E(z) e(t)$ is unpredictable at time $t-k$. Discarding it yields the predictor:
+  $ hat(y)(t|t-k) = F(z) / C(z) y(t-k) + (B(z) E(z)) / C(z) u(t-d) $
 ]
 
 #remark(title: "1-step ARMAX prediction")[
