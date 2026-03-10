@@ -300,7 +300,9 @@
   $ pdv(cal(J)_N, theta, 2) approx 2/N sum pdv(epsilon, theta) (pdv(epsilon, theta))^TT $
 
   #bb[Update rule:]
-  $ theta^((i+1)) = theta^((i)) - [sum pdv(epsilon, theta) (pdv(epsilon, theta))^TT]^(-1) [sum epsilon dot pdv(epsilon, theta)] $
+  $
+    theta^((i+1)) = theta^((i)) - [sum pdv(epsilon, theta) (pdv(epsilon, theta))^TT]^(-1) [sum epsilon dot pdv(epsilon, theta)]
+  $
 
   #bb[Auxiliary signals] ($theta = (a_i, b_l, c_j)^TT$):
   $ alpha(t) = -1/C(z) y(t), quad beta(t) = -1/C(z) u(t), quad gamma(t) = -1/C(z) epsilon(t) $
@@ -314,12 +316,8 @@
   #table(
     columns: (auto, 1fr, 1fr),
     table.header([], [$Delta$ singleton], [$Delta$ not singleton]),
-    [$cal(S) in cal(M)$],
-    [$hat(theta)_N -> theta^0$ (unique)],
-    [$hat(theta)_N ->$ one of $Delta$ (over-param.)],
-    [$cal(S) in.not cal(M)$],
-    [$hat(theta)_N -> theta^*$ (best proxy)],
-    [No guarantee (one of best proxies)],
+    [$cal(S) in cal(M)$], [$hat(theta)_N -> theta^0$ (unique)], [$hat(theta)_N ->$ one of $Delta$ (over-param.)],
+    [$cal(S) in.not cal(M)$], [$hat(theta)_N -> theta^*$ (best proxy)], [No guarantee (one of best proxies)],
   )
 
 
