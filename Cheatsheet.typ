@@ -1,7 +1,7 @@
 // MIDA 1 — Comprehensive Cheatsheet
 // Color-coded: Red=Theorems, Orange=Definitions, Green=Properties, Fuchsia=Examples, Teal=Remarks
 
-#import "../prelude.typ": *
+#import "prelude.typ": *
 
 #set page(flipped: true, paper: "a4", margin: (x: 1.2cm, y: 1.2cm))
 #set text(font: "Libertinus Serif", size: 8pt)
@@ -97,7 +97,7 @@
   ])
 
   #defn([Shift operator], [
-    $z^(-1) x(t) = x(t-1)$, $z x(t) = x(t+1)$. Linear, composable.
+    $z^(-1) x(t) = x(t-1)$, $z x(t) = x(t+1)$. Linear, composable. #h(1em) *Note:* in exercises, do not mix positive with negative operators.
   ])
 
   #thm([Asymptotic stability], [
@@ -106,6 +106,14 @@
 
   #thm([Stationarity of output], [
     If $e(t)$ is SSP and $W(z)$ asymp. stable, then $y(t) = W(z)e(t)$ is SSP.
+  ])
+
+  #defn([Discrete-time transfer function], [
+    Transfer function of SP is $W(z)$ such that $y(t) = W(z) e(t)$ where $e(t) ~ WN$.
+  ])
+
+  #thm([ARMA($m,n$) stationarity], [
+    ARMA($m,n$) is SSP iff $W(z) = C(z)/A(z)$ is asymptotically stable (all poles $|z_i|<1$).
   ])
 
   // ╔══════════════════════════════════════════════╗
@@ -138,6 +146,7 @@
     - $m_y = mu sum_(i=0)^n c_i$ #h(1em) (monic: $c_0=1$, $n+1$ free params)
     - $gamma(tau) = lambda^2 sum_(i=0)^(n-|tau|) c_i c_(i+|tau|)$, #h(0.5em) $gamma(tau)=0$ for $|tau|>n$
     - Always strictly stationary
+    - MA($oo$) requires $sum c_i^2 < oo$ (square-summable) for well-defined variance
   ])
 
   #exmp([MA(1) spectrum], [
@@ -225,6 +234,13 @@
     Uncorr. sum: $z = x+y => Gamma_z = Gamma_x + Gamma_y$.
   ])
 
+  #prop([Euler formula identities], [
+    $e^(j omega) = cos(omega) + j sin(omega)$\
+    $e^(-j omega) = cos(omega) - j sin(omega)$\
+    $e^(-j omega) + e^(j omega) = 2cos(omega)$\
+    $e^(j omega) - e^(-j omega) = 2j sin(omega)$
+  ])
+
   #thm([Spectral factorization], [
     If $y(t) = W(z) v(t)$, $W(z)$ stable:\
     $Gamma_y(omega) = |W(e^(j omega))|^2 Gamma_v(omega)$
@@ -268,6 +284,15 @@
     + *Same degree*: $deg C = deg A$ (null relative degree)
     + *Coprime*: no common factors
     + *Min. phase*: roots of $C(z)$ in $|z| <= 1$; roots of $A(z)$ in $|z| < 1$
+  ])
+
+  #prop([Sources of redundancy (4 transformations)], [
+    + Scale by $alpha/alpha$: $W -> W/alpha$, noise $-> WN(0, alpha^2 lambda^2)$ — resolved by *Monic* condition
+    + Multiply by $z^n / z^n$: shifts noise in time — resolved by *Null relative degree*
+    + Multiply by $(z-p)/(z-p)$ with $|p|<1$: adds removable factors — resolved by *Coprime* condition
+    + Multiply by all-pass $T(z)$ with $|q|>1$: moves poles in/out unit circle — resolved by *Min. phase*
+
+    Removing all redundancy yields *unique canonical representation*.
   ])
 
   #thm([All-pass filter], [
@@ -322,7 +347,10 @@
     From data: $hat(y)(t|t-1) = (C(z)-A(z))/C(z) y(t)$\
     Pred. error (whitening): $epsilon(t|t-1) = A(z)/C(z) y(t) = e(t)$
   ])
-
+  #prop([ARMA($m,n$) mean & representation], [
+    Mean: $m_y = frac(sum_(i=0)^n c_i, 1 - sum_(i=1)^m a_i) m_e$
+    Any AR($m$) with $|a_i|<1$ $=>$ MA($oo$) with $c_k = a^k$ (asymptotic representation)
+  ])
   == Quick Reference
 
   #table(
@@ -519,14 +547,29 @@
     [MDL], [$"MDL"(n) = ln(cal(J)_N) + (n ln N)/(2N)$],
   )
 
+  #table(
+    columns: (auto, 1fr),
+    table.header([*Criterion*], [*When to use*]),
+    [FPE/AIC], [When $S in cal(M)$ or prefer flexibility],
+    [MDL], [True system in model class; more conservative],
+  )
+
   #rmk([Selection rules], [
-    MDL penalizes more $=>$ simpler models. Choose model with *lowest* criterion.
+    MDL penalizes more $=>$ simpler models. FPE and AIC *asymptotically equivalent* for large $N$. Choose model with *lowest* criterion.
+  ])
+
+  #prop([Why tests fail in practice], [
+    + *Finite-sample correlation:* Spurious correlations vanish only as $N -> oo$
+    + *Estimation error:* $hat(theta)_N != theta^0$ exactly; residuals retain true system structure
+    + *Underspecification:* True system $S in.not cal(M)$; residuals contain lost information
+    + *Non-stationarity:* Real data violates constant statistics assumption
+    + *Multiple comparisons:* Testing $T_max$ lags; expect $approx 0.05 T_max$ false positives
   ])
 
   == Cross-validation
 
   #rmk([Train/validation split], [
-    Partition data into identification (training) and validation sets. Standard $k$-fold CV *not suitable* for time series (breaks temporal corr.).
+    Partition data into identification (training) and validation sets. Standard $k$-fold CV *not suitable* for time series (breaks temporal corr.). Use time-series-aware: forward-chaining or rolling windows.
   ])
 
 
@@ -549,7 +592,9 @@
     [Alt. cov.], [$hat(gamma)'_N(tau) = 1/N sum (y-hat(mu))(y_tau - hat(mu))$], [Biased], [Yes],
     [Periodogram], [$hat(Gamma)^"per" = 1/N |sum y(t)e^(-j omega t)|^2$], [Asymp.], [*No*],
   )
-
+  #rmk([Alt. covariance guarantee], [
+    $hat(gamma)'_N(tau)$ biased but guarantees positive semidefinite Toeplitz matrix (useful for factorization).
+  ])
   #rmk([Periodogram inconsistency], [
     Variance $arrow.r.not 0$ as $N -> oo$. Remains $prop Gamma(omega)^2$.
   ])
