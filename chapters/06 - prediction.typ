@@ -81,8 +81,20 @@
 )
 
 #definition(title: "Trivial predictor")[
-  $hat(y) (t+k|t) = EE[y(t)] = m_y$
+  $hat(y) (t+k|t) = E[y(t)] = m_y$
 ]
+
+#remark(title: "Predictor quality")[
+  To measure the quality of a predictor $hat(g)(t+k|t)$, we minimize a loss function $J(hat(y))$.
+
+  *Question:* Which predictor $hat(y)(t+k|t)$ minimizes $J(hat(y))$?
+
+  This is a *hard problem to solve in general*. Since we work with linear models (ARMA), we restrict our focus to *linear predictors* where the solution becomes tractable.
+
+  In our case, we will use the *mean squared prediction error* as a loss function.
+]
+
+
 
 #definition(title: "Linear predictor")[
   An "optimal" linear predictor contains both information about the model information $chevron.l alpha_0, alpha_1, dots chevron.r$ and the data $chevron.l y(t), y(t-1), dots chevron.r$.
@@ -153,7 +165,8 @@
 
   Then, we reformulate the optimization problem wrt $alpha$ in a new optimization problem wrt $beta$
   $ cal(V) = EE[(y(t+k) - hat(y)(t+k|t, beta))^2] $
-  we are now looking for $hat(beta) = argmin_beta cal(V) (beta)$
+  we are now looking for
+  $ hat(beta) = argmin_beta cal(V) (beta) $
 
   Let's consider $y(t+k)$ alone, we can split it into two parts
   $
@@ -186,14 +199,19 @@
   ]
   This means that $hat(beta)_i = w_(k+i), i = 0, 1, dots$
 
-  So our optimal predictor is
+  So our optimal predictor is given by the minimizer of
+  $ EE[(sum_(i=0)^(+infinity) (w_(k+i) - beta_i) e(t-i))^2] $
+
+  which if we set
+  $ hat(beta)_i = w_(k+i) $
+  is
   $ hat(y)(t+k|t) = sum_(i=0)^(+infinity) w_(k+i) e(t-i) $
 ]
 
 #remark[
-  This solution presents some practical challenges, because:
-  - it requires samples of $e(t)$ (we can only sample $y(t)$)
-  - it requires the use of an infinite number of coefficients
+  This solution presents some practical challenges, because it is a:
+  - *predictor from noise*: it requires samples of $e(t)$ (we can only sample $y(t)$)
+  - *full noise realization*: it requires the use of an infinite number of coefficients
 ]
 
 #problem[
@@ -250,7 +268,7 @@
   $ y(t+k) = #[prediction error] + #[prediction at time $t$] $
 
   #definition(title: "Predictor from noise")[
-    Given a SSP $y(t) = W(z)e(t)$
+    Given a SS  P $y(t) = W(z)e(t)$
     where
     - $W(z)$ in normal form
     - $e(t) ~ WN(0, lambda^2)$
@@ -328,10 +346,17 @@
   ]
 ]
 
+#remark[
+  - Predictors are stochastic processes $hat(y) (t+k | t, s) = F(z)/C(z) y(t, s)$
+  - Predictors are stationary since
+    - $C(z)$ roots are inside the unit circle in canonical form.
+    - $y(t)$ is stationary
+]
+
 #remark(title: "Remark: Predictors in practice")[
   How can we use the predictor from data in practice?
   Since our Stochastic process is stationary, we have that:
-  $ hat(y)(t+k|t) = F(z) / C(z) y(t) arrow.r.double.long hat(y)(t|t-k) = F(z) / C(z) y(t-k) $
+  $ hat(y)(t+k|t) = F(z) / C(z) y(t) <==> hat(y)(t|t-k) = F(z) / C(z) y(t-k) $
   This means we can get a predicition for the next possible value of our time-series. and we can compute it with data that we have, $y(t-k)$.
 ]
 
@@ -363,8 +388,11 @@ $
 $
 
 #remark[
-  If $k -> +infinity$ then $E(z)$ becomes the $MA(infinity)$ representation of $y(t)$.
-  This means that $ EE[epsilon(t+k|t)^2] = EE[E(z)e(t+k)] -->_(k -> +infinity) EE[y(t)] $
+  If $k -> +infinity$ then $E(z)$ becomes the $MA(infinity)$, representation of $y(t)$.
+  This means that
+  $
+    EE[epsilon(t+k|t)^2] = EE[(E(z)e(t+k))^2] -->_(k -> +infinity) EE[y(t)^2] = VV[y(t)] = sum_(i=0)^(infinity) e_i lambda^2
+  $
 ]
 
 #figure(
@@ -497,12 +525,11 @@ $ "var"[e(t)] <= "var"[epsilon(t+k|t)] < "var"[y(t)] $
                   & = F(z) / C(z) y(t) - F(z) / C(z) m_y + m_y
   $
 
-  Since $m_y$ is a constant, applying a transfer function $G(z)$ to a constant yields $G(1) dot m_y$ (the DC gain):
+  Since $m_y$ is a constant, applying a transfer function $G(z)$ to a constant yields $G(1) dot m_y$ (the DC gain, static gain of the system):
   $ F(z) / C(z) m_y = F(1) / C(1) m_y $
 
   And we can finally write
-  $ hat(y)(t+k|t) = F(z) / C(z) y(t) + "bias" $
-  where $"bias" = (1 - F(1) / C(1)) m_y$
+  $ hat(y)(t+k|t) = F(z) / C(z) y(t) + "bias" \ "bias" = (1 - F(1) / C(1)) m_y $
 ]
 
 == Prediction examples

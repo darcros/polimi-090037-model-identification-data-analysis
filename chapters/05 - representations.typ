@@ -22,35 +22,67 @@ $Gamma(omega) = sum_(-infinity)^(+infinity) gamma_y(t) e^(-j omega tau)$
   Reliable forecasts are based on unique representations.
   It is possible to represent a class of equivalent SP in different representations, but for each of them there are infinitely many representations $W(z)$, $e(t)$ that produce a specific given $y(t)$ as outcome.
 
-  Some cases follow:
+  The table below shows four sources of redundancy in representing the same output process:
 
-  Cases:
+  #figure(
+    table(
+      columns: (auto, 1.8fr, 1.5fr, 1.8fr, 1.8fr),
+      align: (center, center, center, center, center),
+      stroke: 0.5pt,
 
-  - $y(t) = W(z) e(t)$
-  1. $y(t) = W(z) alpha / alpha e(t)
-    cases(
-      tilde(W)(z) = W(z) / alpha,
-      tilde(e)(t) = alpha e(t)
-    )$
+      [*Case*], [*Original*], [*Transformation*], [*New $tilde(W)(z)$*], [*New $tilde(e)(t)$*],
 
-  2. $y(t) = W(z) z^n / z^n e(t)
-    cases(
-      tilde(W)(z) = W(z) z^n,
-      tilde(e)(t) = z^{-n} e(t) = e(t-n)
-    )$
+      [1],
+      text(size: 8pt, [$W(z)e(t)$]),
+      text(size: 8pt, [Mult. $alpha/alpha$]),
+      text(size: 8pt, [$W(z)/alpha$]),
+      text(size: 8pt, [$WN(0, alpha^2 lambda^2)$]),
 
-  3. $y(t) = W(z) (z-p) / (z-p) e(t) , p in CC, abs(p)<1
-    cases(
-      tilde(W)(z) = W(z) (z-p) / (z-p),
-      tilde(e)(t) = e(t)
-    )$
-  has a different difference equation than the original one but same dynamics.
+      [2],
+      text(size: 8pt, [$W(z)e(t)$]),
+      text(size: 8pt, [Mult. $z^n/z^n$]),
+      text(size: 8pt, [$W(z)z^n$]),
+      text(size: 8pt, [$e(t-n), WN(0, lambda^2)$]),
 
-  4. $y(t) = W(z) 1 / q (z-q) / (z-1 / q) e(t) , p in CC, abs(p)>1$
+      [3],
+      text(size: 8pt, [$W(z)e(t)$ \  $|p|<1$]),
+      text(size: 8pt, [Mult. $(z-p)/(z-p)$]),
+      text(size: 8pt, [$W(z)(z-p)/(z-p)$]),
+      text(size: 8pt, [$e(t)$ (same)]),
 
-  Which is dimostrably equivalent $Gamma_y(t) = abs(Gamma(e^{j omega}))^2 = Gamma_e(omega)$
+      [4],
+      text(size: 8pt, [$W(z)e(t) equiv_(Gamma) tilde(W) tilde(e)(t)$ \ $|q|>1$
+
+        *Proof* \
+        $y = W(z) e(t)
+        = \ underbrace(W_1(z) (z-q), W(z)) e(t)
+        = \ underbrace(W_(1)(z) ((1-1/q)/1), tilde(W)(z)) underbrace((1/(1-1/q))(z-q), tilde(e) (t) = G(z)e(t))e(t) = \ tilde(W)(z) tilde(e)(t)$
+      ]),
+      text(size: 8pt, [$W(z) = W_1(z) (z-q)\ $]),
+      text(size: 8pt, [$W_1(z) (z - 1/q)$]),
+      text(size: 8pt, [$G(z)e(t) = (z-q)/(z-1/q) e(t) \ tilde WN(0, q^2 lambda^2)$]),
+    ),
+    caption: [Sources of redundancy in process representation. All transformations preserve output $y(t)$.],
+  )
+
 
 ]
+
+=== Case 4: All-pass filter spectrum preservation
+
+*Proof:* Define $G(z) = (z-q)/(z-1/q)$ with $T(z) = 1/q dot G(z)$. For $tilde(W)(z) = W(z) T(z)$, the transformed white noise is $tilde(e)(t) = G(z) e(t)$. Computing $|G(e^(j omega))|^2$:
+
+$ |G(e^(j omega))|^2 = | (e^(j omega) - q)/(e^(j omega) - 1/q) |^2 $
+
+$ = underbrace((1 + q^2 - 2q cos(omega))/(1 + 1/q^2 - 2/q cos(omega)), "simplify to") = underbrace(q^2, "constant") $
+
+Thus $underbrace(Gamma_tilde(e)(omega) = q^2 lambda^2, "flat spectrum")$, and:
+
+$
+  Gamma_y(omega) = underbrace(|W(e^(j omega))|^2 |T(e^(j omega))|^2 q^2 lambda^2, "combined") = underbrace(|W(e^(j omega))|^2 lambda^2, "cancels T")
+$
+
+The spectrum is preserved. $square$
 
 For each of these possible cases, we can define properties so to define a SSP in a unique way, selecting a *Canonical representation*.
 
@@ -59,14 +91,28 @@ For each of these possible cases, we can define properties so to define a SSP in
 
   Let $y(t)$ be a SSP with a *rational* $Gamma_y(omega) in QQ$.
 
-  Then there exists a unique representation $W(z)$, $e(t)$ such that $y(t) = W(z) e(t)$ and \ $W(z)= C(z)/A(z), z in CC$ if the following conditions hold:
-  + $$C(z), A(z)$,$ are *monic*: the leading coefficient is 1 \ $cases(
-      C(z) = 1 + c_1z^{-1} + ... + c_n z^{-n},
-      A(z) = 1 + a_1z^{-1} + ... + a_m z^{-m}
-    )$
-  + $C(z), A(z)$ have *null relative degree*: $nu = n- m$
-  + $C(z), A(z)$ are *coprime*: the greatest common divisor is 1
-  + $C(z)$ has all roots in the *closed* unit circle ($|z_i| <= 1$), and $A(z)$ has all roots in the *open* unit circle ($|z_i| < 1$)
+  Then there exists a unique representation $W(z)$, $e(t)$ such that $y(t) = W(z) e(t)$ and $W(z)= C(z)/A(z)$ if the following conditions hold:
+
+  #figure(
+    table(
+      columns: (auto, 1fr),
+      align: (left, left),
+      stroke: 0.5pt,
+
+      [*Condition*], [*Requirement*],
+
+      [*Monic*],
+      [Leading coefficient is 1: \ $C(z) = 1 + c_1z^{-1} + ... + c_n z^{-n}$ \ $A(z) = 1 + a_1z^{-1} + ... + a_m z^{-m}$],
+
+      [*Null relative degree*], [$nu = n - m$],
+
+      [*Coprime*], [Greatest common divisor is 1],
+
+      [*Root locations*],
+      [$C(z)$ roots in closed unit circle: $|z_i| <= 1$ \ $A(z)$ roots in open unit circle: $|z_i| < 1$],
+    ),
+    caption: [Conditions for canonical representation],
+  )
 
   $hat(W)(z)$ takes the name of *canonical spectral factor*.
 

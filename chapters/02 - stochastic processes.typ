@@ -387,6 +387,10 @@ This is needed in order to use @thm:stationarity
   / Forward-shift operator: $ z^1 dot x(t) = x(t+1) $
 ]
 
+#note-box[
+  In exercises do not mix positive with negative operators.
+]
+
 #properties(title: "Shift operator properties")[
   / Linearity: $ z^(-1)(a x(t) + b y(t)) = a x(t-1) + b y(t-1) quad a,b in RR $
   / Recursive application: $ z^(-1)(z^(-1) (z^(-1) x(t))) = z^(-3) x(t) $
@@ -400,6 +404,12 @@ Most notably:
   $ W(z) e(t) = C(z) / A(z) e(t) quad z in CC $
 - all $ARMAX$ models can be written as
   $ W(z) e(t) = B(z) / A(z) z^(-k) u(t) + C(z) / A(z) e(t) quad z in CC $
+
+#definition(title: "Discreet time Transfer function of a SP")[
+  The transfer function of a SP is the function $W(z)$ such that $y(t) = W(z) e(t)$ where $e(t)$ is a white noise process.
+]
+
+
 
 #note-box[
   All the properties of generic transfer functions apply:
@@ -545,3 +555,8 @@ Most notably:
   - $e(t)$ is SSP
   - $W(z)$ is asymptotically stable
 ] <thm:stationarity>
+
+
+#theorem(title: "Stationarity of ARMA(n,m) models")[
+  The ARMA(n,m) model represents a SSP if and only if W(z) is asymptotically stable.
+]

@@ -479,7 +479,7 @@ $
   hat(theta)_N & = [sum_(t=1)^N phi(t)phi(t)^TT]^(-1) sum_(t=1)^N phi(t)y(t) \
 $
 
-This result is called *ordinary least squares formulas*. It's the only case of explicit solution for identification problems adn depends on the data only.
+This result is called *ordinary least squares formulas*. It's the only case of explicit solution for identification problems and it depends on the data only.
 
 Let's analyze the hessian matrix to check if the solution is a minimum:
 
@@ -493,7 +493,7 @@ $
 We need to check if that result is positive definite.
 
 #remark[
-  A quadratic matrix $M$ is *positive definite* if
+  A quadratic matrix $M$ is *positive definite* ($M succ 0$) if
   $ x^T M x > 0 quad forall x != 0 $
 ]
 

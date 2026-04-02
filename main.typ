@@ -20,9 +20,8 @@
     "Matteo Garzone",
   ),
 )
-
 #show heading.where(level: 1): it => {
-  pagebreak()
+  pagebreak(weak: true)
   it
 }
 
@@ -37,5 +36,5 @@
 #include "chapters/09 - non parametric identification.typ"
 #include "chapters/10 - data preprocessing.typ"
 #include "chapters/11 - time series analysis.typ"
-#heading(level: 1, numbering: none)[Cheatsheet A]
-#include "chapters/A - cheatsheet.typ"
+//#heading(level: 1, numbering: none)[Cheatsheet A]
+//#include "chapters/A - cheatsheet.typ"

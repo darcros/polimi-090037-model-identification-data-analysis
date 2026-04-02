@@ -74,6 +74,73 @@ So we analyze the covariance function $gamma$ instead.
   The variance equals the total area under the spectrum (divided by $2 pi$).
 ]
 
+#figure(
+  cetz.canvas({
+    import cetz.draw: *
+
+    // Axes
+    line((-5, 0), (5, 0), stroke: black + 0.8pt)
+    line((0, -0.5), (0, 4), stroke: black + 0.8pt)
+
+    // Axis labels
+    content((5.3, -0.3), $omega$, anchor: "west")
+    content((-0.3, 4.2), $Gamma(omega)$, anchor: "south")
+
+    // Axis ticks and labels
+    line((-calc.pi, -0.2), (-calc.pi, 0.2), stroke: black + 0.5pt)
+    content((-calc.pi, -0.6), $-pi$, anchor: "north", font-size: 9pt)
+
+    line((calc.pi, -0.2), (calc.pi, 0.2), stroke: black + 0.5pt)
+    content((calc.pi, -0.6), $pi$, anchor: "north", font-size: 9pt)
+
+    line((0, -0.2), (0, 0.2), stroke: black + 0.5pt)
+
+    // Draw smooth spectrum curve using many segments
+    let spectrum(omega) = {
+      let a = 0.6
+      let lambda2 = 1.0
+      return lambda2 / (1.0 + a * a - 2.0 * a * calc.cos(omega)) * 1.0
+    }
+
+    let points = ()
+    for i in range(0, 201) {
+      let omega = -calc.pi + i * 2.0 * calc.pi / 200.0
+      let val = spectrum(omega)
+      points.push((omega * 0.8, val + 0.3))
+    }
+
+    // Draw hatching under the curve
+    for i in range(0, 200) {
+      let x = -calc.pi * 0.8 + i * calc.pi * 1.6 / 200.0
+      let y = spectrum(x / 0.8) * 1.0 + 0.3
+      line((x, 0.3), (x, y), stroke: purple + 0.5pt)
+    }
+
+    // Draw curve
+    let prev = none
+    for pt in points {
+      if prev != none {
+        line(prev, pt, stroke: purple + 1.5pt)
+      }
+      prev = pt
+    }
+
+    // Annotation for the area
+    content(
+      (0, 1.8),
+      $gamma(0) dot 2pi$,
+      anchor: "south",
+      fill: white,
+      padding: 2pt,
+      stroke: purple + 0.5pt,
+      font-size: 10pt,
+    )
+    line((0, 1.7), (0, 1.1), stroke: purple + 1pt, mark: (end: ">"))
+  }),
+  caption: [The variance $gamma(0) = "Var"[y(t)]$ equals the area under the spectrum curve: the shaded region equals $gamma(0) dot 2pi = integral_(-pi)^(pi) Gamma(omega) dif omega$.],
+)
+
+
 #lemma(title: "Shannon sampling bound")[
   The minimum time period that can be represented by $Gamma(omega)$ in is two samples.
 
@@ -106,7 +173,71 @@ So we analyze the covariance function $gamma$ instead.
   - $e^(j omega) = cos omega + j sin omega$
   - $e^(-j omega) = cos omega - j sin omega$
   - $e^(-j omega) + e^(j omega) = 2 cos(omega)$
+  - $e^(j omega) - e^(-j omega) = 2 j sin(omega)$
+
+  On the unit circle: $e^(j omega)$ and $e^(-j omega)$ are complex conjugates. The first rotates counterclockwise by angle $omega$, decomposing into $cos omega$ (real) and $sin omega$ (imaginary). Its conjugate is reflected across the real axis.
 ]
+
+#figure(
+  cetz.canvas(length: 1cm, {
+    import cetz.draw: *
+
+    // Axes
+    line((-2.3, 0), (2.3, 0), stroke: 0.6pt)
+    line((0, -2.3), (0, 2.3), stroke: 0.6pt)
+
+    // Axis labels
+    content((2.45, -0.12), [Re], anchor: "west", size: 7pt)
+    content((-0.12, 2.45), [Im], anchor: "south", size: 7pt)
+
+    // Unit circle
+    let steps = 60
+    for i in range(steps) {
+      let angle1 = i * 360deg / steps
+      let angle2 = (i + 1) * 360deg / steps
+      let x1 = 2.0 * calc.cos(angle1)
+      let y1 = 2.0 * calc.sin(angle1)
+      let x2 = 2.0 * calc.cos(angle2)
+      let y2 = 2.0 * calc.sin(angle2)
+      line((x1, y1), (x2, y2), stroke: 0.5pt)
+    }
+
+    // e^(jω) at 50 degrees
+    let omegaa = 50deg
+    let x_pos = 2.0 * calc.cos(omegaa)
+    let y_pos = 2.0 * calc.sin(omegaa)
+
+    // e^(-jω) reflected
+    let x_neg = 2.0 * calc.cos(omegaa)
+    let y_neg = -2.0 * calc.sin(omegaa)
+
+    // Lines from origin
+    line((0, 0), (x_pos, y_pos), stroke: red + 0.8pt)
+    line((0, 0), (x_neg, y_neg), stroke: green + 0.8pt)
+
+    // Projections on axes
+    line((x_pos, 0), (x_pos, y_pos), stroke: (paint: gray, thickness: 0.4pt, dash: "dashed"))
+    line((0, y_pos), (x_pos, y_pos), stroke: (paint: gray, thickness: 0.4pt, dash: "dashed"))
+
+    // Points
+    circle((x_pos, y_pos), radius: 0.06, fill: red, stroke: none)
+    circle((x_neg, y_neg), radius: 0.06, fill: green, stroke: none)
+
+    // Labels
+    content((x_pos + 0.2, y_pos + 0.15), $e^(j omega)$, anchor: "south-west", size: 6pt)
+    content((x_neg + 0.2, y_neg - 0.15), $e^(-j omega)$, anchor: "north-west", size: 6pt)
+    content((0.3, 0.1), $omega$, anchor: "south-west", size: 6pt)
+
+    // Axis projections labels
+    content((x_pos, -0.2), $cos omega$, anchor: "north", size: 6pt)
+    content((-0.25, y_pos), $sin omega$, anchor: "east", size: 6pt)
+  }),
+  caption: [Unit circle: $e^(j omega)$ and its conjugate $e^(-j omega)$.],
+)
+
+
+
+
 
 #theorem(title: "spectral factorization")[
   #{
@@ -128,12 +259,65 @@ So we analyze the covariance function $gamma$ instead.
 
   Then we can reconduce the spectral density of the output to the spectral density of the input.
   $ Gamma_y(omega) = |W(e^(j omega))|^2 Gamma_v(omega) = W(e^(j omega)) W(e^(-j omega)) Gamma_v(omega) $
+
+  Note: $W(e^(j omega))$ is called the frequency response of the filter W(z).
 ]
 #remark(title: "Remark: Gamma function of a white noise")[
   From the definition of *inverse DFT*, if $u(t)$ is a *white noise* process, the only non-zero term for $gamma_y (tau)$ is at $tau = 0$. Therefore, the spectral density of a white noise process is constant.
 
   $ Gamma_u (omega) = gamma_u (0) dot e^(- j omega 0) = gamma_u (0)= lambda^2 forall omega $
 ]
+
+#figure(
+  cetz.canvas({
+    import cetz.draw: *
+
+    // Axes
+    line((-5, 0), (5, 0), stroke: black + 0.8pt)
+    line((0, -0.3), (0, 2), stroke: black + 0.8pt)
+
+    // Axis labels
+    content((5.3, -0.2), $omega$, anchor: "west")
+    content((-0.3, 2.1), $Gamma(omega)$, anchor: "south")
+
+    // Axis ticks and labels
+    line((-calc.pi, -0.15), (-calc.pi, 0.15), stroke: black + 0.5pt)
+    content((-calc.pi, -0.4), $-pi$, anchor: "north", font-size: 9pt)
+
+    line((calc.pi, -0.15), (calc.pi, 0.15), stroke: black + 0.5pt)
+    content((calc.pi, -0.4), $pi$, anchor: "north", font-size: 9pt)
+
+    line((0, -0.15), (0, 0.15), stroke: black + 0.5pt)
+
+    // Constant spectrum for white noise
+    let lambda2 = 1.0
+    let wn-spectrum = 0.3 + lambda2 * 0.5
+
+    // Draw constant horizontal line
+    line((-calc.pi * 0.8, wn-spectrum), (calc.pi * 0.8, wn-spectrum), stroke: purple + 1.5pt)
+
+    // Draw hatching under the (constant) line
+    for i in range(0, 200) {
+      let x = -calc.pi * 0.8 + i * calc.pi * 1.6 / 200.0
+      line((x, 0.3), (x, wn-spectrum), stroke: purple + 0.5pt)
+    }
+
+    // Annotation for constant spectrum
+    content(
+      (calc.pi * 0.9, wn-spectrum),
+      $lambda^2$,
+      anchor: "west",
+      fill: white,
+      padding: 2pt,
+      stroke: purple + 0.5pt,
+      font-size: 10pt,
+    )
+  }),
+  caption: [The spectrum of white noise is *constant* across all frequencies: $Gamma(omega) = lambda^2$ for all $omega$. This indicates that white noise contains all frequencies with equal power.],
+)
+
+
+
 
 #remark[
   $ W(z)|_(z = e^(j omega)) = W(e^(j omega)) $ is called "Frequency response" of $W(z)$

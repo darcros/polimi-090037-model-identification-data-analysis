@@ -185,10 +185,13 @@
 === Moving averages of order $infinity$
 With the objective of modelling every kind of stochastic process, including those that have memory of the previous inputs and previous outputs, we define processes which have memory of any input up to that point because any previous output will also be a linear combination of previous inputs.
 
-#definition(title: [Moving Average of order $infinity$])[
+#definition(title: [Moving Average of order $infinity$, $MA(infinity)$])[
   Let $e(t) ~ WN(mu, lambda^2)$
 
-  Then, under the assumption that $sum_(i=0)^infinity c_i < infinity$
+  Then, under the assumption that $sum_(i=0)^infinity c_i^2 < infinity$
+
+  Note that coefficients must be square-summable, otherwise the variance would be infinite and the process would not be well defined.
+
   $ y(t) = c_0 e(t) + c_1 e(t-1) + dots = sum_(i=0)^infinity c_i e(t) ~ MA(infinity) $
 
   Moving averages are SSPs.
@@ -218,7 +221,7 @@ With the objective of modelling every kind of stochastic process, including thos
 #remark[
   With autoregressive models we can have $gamma(tau) != 0$ for $tau -> infinity$ with a finite number of coefficients.
   - This is not possible with $MA(n)$ models.
-  - This is possible with $MA(infinity)$ models, but working with an infinite number of coefficients is cumbersome.
+  - This is possible with $MA(infinity)$ models, but working with an infinite number of coefficients is cumbersome. If not impossible.
 
   Any $AR(m)$ model with stable poles can be expressed as an $MA(infinity)$ model.
 ]
@@ -415,13 +418,18 @@ Then we can calculate the mean value $m$ and covariance function $gamma(tau)$ by
 
   Therefore: $v(t) = e(t) + a e(t-1) + a^2 e(t-2) + dots = sum_(k=0)^infinity a^k e(t-k) tilde MA(infinity)$
 
+  Meaning that an AR(1) process can be represented as an MA(infinity) process with coefficients $c_k = a^k$.
+
   This converges iff $|a| < 1$ (the pole is inside the unit circle).
 ]
 
-#theorem[
+#theorem(title: "Null expected value for AR(1) innovations")[
+
   Let $e(t) ~ WN(0, lambda^2)$ and $y(t) = e(t) + a y(t-1) ~ AR(1)$
 
   Then $EE[y(t-tau) e(t)] = 0, forall tau > 0$
+
+  Meaning, that any process multiplied by a noise term in the future of the process has null expected value.
 ] <thm:null-expected-value>
 
 #remark[
@@ -534,6 +542,14 @@ The modeling power of $MA(infinity)$ is unmatched by $AR(1)$ models but we can c
   }),
   caption: [Covariance function of an $ARMA(1, 1)$ process ($a = 0.7, c_1 = 0.5$). For $|tau| >= 2$, $gamma(tau) = a dot gamma(tau-1)$: the tail decays exponentially like an AR(1), but the initial values $gamma(0), gamma(1)$ are shaped by the MA part.],
 )
+
+#properties[
+  - $y ~ ARMA(m, n)$
+
+  $m_y = (sum_(i=1)^m a_i) m_y + (sum_(i=0)^n c_i) m_e$
+  $ m_y = (sum_(i=0)^n c_i)/ (1 - sum_(i=1)^m a_i) m_e $
+]
+
 
 === Other variants of ARMA
 
